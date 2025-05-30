@@ -1,12 +1,15 @@
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
+import { useUser } from "@clerk/clerk-react";
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { useMutation } from "convex/react";
-import { ChevronDown, ChevronRight, CommandIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, CommandIcon, MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { BiPlus } from "react-icons/bi";
+import { BiDotsHorizontal, BiPlus, BiTrash } from "react-icons/bi";
 import { toast } from "sonner";
 
 interface ItemProps {
@@ -41,6 +44,8 @@ const Item: ItemComponent = ({
 
   const router = useRouter();
   const create = useMutation(api.documents.create );
+  const archive = useMutation(api.documents.archive);
+  const { user } = useUser();
 
   const handleExpand = (event: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
     event.stopPropagation();
@@ -73,6 +78,18 @@ const Item: ItemComponent = ({
         success:"Note created successfully!",
         error:"Note creation failed "
       })
+    })
+  }
+
+  const onArchive = (event: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
+    event.stopPropagation();
+    if(!id) return;
+    const promise = archive({id})
+  
+    toast.promise(promise, {
+      loading:"Moving to trash",
+      success:"Note moved to trash!",
+      error:"Failed to archive note"
     })
   }
 
@@ -113,6 +130,24 @@ const Item: ItemComponent = ({
            <div role="button" onClick={onCreate} className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-theme-blue/20">
             <BiPlus/> 
            </div>
+
+           <DropdownMenu>
+            <DropdownMenuTrigger onClick={(e) => {
+              e.stopPropagation();
+            }} asChild>
+              <div role="button" onClick={onCreate} className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-theme-blue/20">
+                <BiDotsHorizontal size={15}/>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-60" align="start" side="right" forceMount>
+              <DropdownMenuItem onClick={onArchive}>
+                <BiTrash/>
+                Delete
+              </DropdownMenuItem>
+              <DropdownMenuSeparator/>
+              <div className="text-xs text-theme-blue p-2 ">Last edited by: {user?.fullName}</div>
+            </DropdownMenuContent>
+           </DropdownMenu>
         </div>
       )}
     </div> 
