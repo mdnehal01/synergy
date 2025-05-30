@@ -6,7 +6,7 @@ import { useUser } from '@clerk/clerk-react';
 import { Button } from '@/components/ui/button';
 import { GrAddCircle } from 'react-icons/gr';
 import { useMutation } from 'convex/react';
-import { api  } from '@/convex/_generated/api';
+import { api  } from '@/convexccc/_generated/api';
 import { toast } from 'sonner';
 
 const DocumentsPage = () => {

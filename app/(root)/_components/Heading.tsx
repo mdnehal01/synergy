@@ -10,9 +10,6 @@ import { toast } from 'sonner'
 
 const Heading = () => {
     const {isLoaded, isSignedIn} = useUser();
-    const { isLoading, isAuthenticated } = useConvexAuth();
-
-    if(isAuthenticated) toast.success("ASS")
 
     return (
         <div className='max-w-3xl space-y-4'>

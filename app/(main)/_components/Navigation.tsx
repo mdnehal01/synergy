@@ -1,15 +1,24 @@
 "use client"
 import { cn } from '@/lib/utils';
-import { ChevronsLeft, MenuIcon } from 'lucide-react'
+import { ChevronsLeft, MenuIcon, Search, Settings } from 'lucide-react'
 import { usePathname } from 'next/navigation';
 import React, { ElementRef, MouseEvent, useEffect, useRef, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts';
 import UserItem from './UserItem';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { GrAddCircle } from 'react-icons/gr';
+import Item from './Item';
+import { toast } from 'sonner';
+import { DocumentList } from './document-list';
 
 const Navigation = ()  => {
     const pathname = usePathname();
 
     const isMobile = useMediaQuery("(max-width: 768px)")
+
+    const documents = (api.documents.getsidebar);
+    const create = useMutation(api.documents.create) 
 
     const isResizingRef = useRef(false);
     const sidebarRef = useRef<ElementRef<"aside">>(null);
@@ -91,6 +100,14 @@ const Navigation = ()  => {
         }
     }
 
+    const handleCreate = () => {
+        const promise = create({ title:"Untitled" })
+        toast.promise(promise, {
+            loading: "Creating a new note...",
+            success: "New note created!",
+            error: "Failed to create a new note."
+        })
+    }
     return (
         <>
             <aside ref={sidebarRef } className={cn('group/sidebar h-full bg-theme-green overflow-y-auto relative flex w-60 flex-col z-[99999] text-white',
@@ -104,10 +121,29 @@ const Navigation = ()  => {
                 </div>
                 <div>
                     <UserItem/>
+                    
+                    <Item
+                        label='Search'
+                        icon={<Search size={15} className='mr-2'/>}
+                        isSearch
+                        onclick={() => {}} 
+                    />
+
+                    <Item
+                        label='Settings'
+                        icon={<Settings size={15} className='mr-2'/>}
+                        onclick={() => {}} 
+                    />
+
+                    <Item
+                        onclick={handleCreate} 
+                        label="New Page"
+                        icon={<GrAddCircle className='shrink-0 h-[18px] mr-2 text-white'/>}
+                    />
                 </div>
 
                 <div className='mt-4'>
-                    <p>Documents</p>
+                    <DocumentList/>
                 </div>
 
                 {/* THAT SIDE one which can be used to Extend sidebar */}
