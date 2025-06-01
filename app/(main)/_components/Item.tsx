@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 interface ItemProps {
   label: string;
-  onclick: () => void;
+  onclick?: () => void;
   icon: React.ReactNode;
   id?: Id<"documents">;
   documentIcon?: React.ReactNode;

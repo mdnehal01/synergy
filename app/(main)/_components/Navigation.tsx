@@ -1,16 +1,21 @@
 "use client"
 import { cn } from '@/lib/utils';
 import { ChevronsLeft, MenuIcon, Search, Settings } from 'lucide-react'
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import React, { ElementRef, MouseEvent, useEffect, useRef, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts';
 import UserItem from './UserItem';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { GrAddCircle } from 'react-icons/gr';
+import { GrAdd, GrAddCircle } from 'react-icons/gr';
 import Item from './Item';
 import { toast } from 'sonner';
 import { DocumentList } from './document-list';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { BiTrash } from 'react-icons/bi';
+import TrashBox from './trash-box';
+import { useSearch } from '@/hooks/use-search';
+import Navbar from './navbar';
 
 const Navigation = ()  => {
     const pathname = usePathname();
@@ -25,6 +30,8 @@ const Navigation = ()  => {
     const navbarRef = useRef<ElementRef<"div">>(null);
     const [isResetting, setIsResseting] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(isMobile); 
+    const params = useParams();
+    const search = useSearch()
 
     useEffect(() => {
         if(isMobile){
@@ -126,7 +133,7 @@ const Navigation = ()  => {
                         label='Search'
                         icon={<Search size={15} className='mr-2'/>}
                         isSearch
-                        onclick={() => {}} 
+                        onclick={search.onOpen} 
                     />
 
                     <Item
@@ -144,11 +151,28 @@ const Navigation = ()  => {
 
                 <div className='mt-4'>
                     <DocumentList/>
+                    <Item onclick={handleCreate} 
+                        icon={<GrAdd  className='h-[18px] mr-2'/>}
+                        label='Add a page'
+                    />
+                    <Popover>
+                        <PopoverTrigger className='mt-4 w-full'>
+                            <Item label='Trash'
+                                icon={<BiTrash className='h-[18px] mr-2'/>}
+                            />
+                        </PopoverTrigger>
+                        <PopoverContent side={isMobile ? "bottom" : "right"}
+                            className='p-0 w-72'
+                        >
+                            {/* COMPONENT */}
+                            <TrashBox/>
+                        </PopoverContent>
+                    </Popover>
                 </div>
 
                 {/* THAT SIDE one which can be used to Extend sidebar */}
                 <div 
-                    onMouseDown={handleMouseDown} 
+                    onMouseDown={() => handleMouseDown} 
                     className='opacity-0 
                         group-hover/sidebar:opacity-100 
                         transition cursor-ew-resize 
@@ -165,9 +189,16 @@ const Navigation = ()  => {
             )} 
             ref={navbarRef}
             >
+                {!!params.documentId ? (
+                    <Navbar
+                        isCollapsed={isCollapsed}
+                        onResetwidth={resetWidth}
+                    />
+                ): (
                 <nav className='bg-transparent px-3 py-2 w-full'>
                     {isCollapsed && <MenuIcon onClick={resetWidth} role='button' className='h-6 w-6 text-black'/>}
                 </nav>
+                )}
             </div>
         </>
     )
