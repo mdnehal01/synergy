@@ -11,6 +11,7 @@ interface TitleProps{
     initialData:Doc<"documents">;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface TitleComponent extends React.FC<TitleProps> {
   Skeleton: () => JSX.Element;
 }
@@ -84,7 +85,7 @@ const Title:React.FC<TitleProps> = ({
 
 export default Title
 
-
+// @ts-expect-error err
 Title.Skeleton = function TitleSkeleton() {
   return <Skeleton className="h-9 w-16 rounded-md" />;
 };

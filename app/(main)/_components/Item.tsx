@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { useMutation } from "convex/react";
-import { ChevronDown, ChevronRight, CommandIcon, MoreHorizontal } from "lucide-react";
+import { ChevronDown, ChevronRight, CommandIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { BiDotsHorizontal, BiPlus, BiTrash } from "react-icons/bi";
@@ -71,7 +71,7 @@ const Item: ItemComponent = ({
       if(!expanded) {
         onExpand?.();
       }
-      // router.push(`/documents/${documentId}`)
+      router.push(`/documents/${documentId}`)
 
       toast.promise(promise, {
         loading:"Creating a note",
@@ -113,7 +113,7 @@ const Item: ItemComponent = ({
         </div>
       )}
 
-      <div>{documentIcon || icon}</div>
+      <div className="mr-2">{documentIcon || icon}</div>
       <span className="truncate">{label}</span>
 
       {isSearch && (

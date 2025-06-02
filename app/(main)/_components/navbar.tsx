@@ -25,6 +25,7 @@ const Navbar:React.FC<NavbarProps> = ({
     if(document === undefined){
         return (
             <nav className='bg-neutral-100 dark:bg-theme-lightgreen  px-3 py-2 w-full flex items-center'>
+                {/* @ts-expect-error abc */}
                 <Title.Skeleton/>
             </nav>
         )

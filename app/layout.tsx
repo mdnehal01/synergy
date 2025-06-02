@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import ConvexClientProvider from "@/lib/providers/convex-provider";
 import {Toaster} from 'sonner';
-import { ClerkProvider } from "@clerk/clerk-react";
+import { EdgeStoreProvider } from "@/lib/edgestore";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,7 +33,9 @@ export default function RootLayout({
       >
         <Toaster position="bottom-center"/>
           <ConvexClientProvider>
-            {children}
+            <EdgeStoreProvider>
+                {children}
+            </EdgeStoreProvider>
           </ConvexClientProvider>
 
       </body>

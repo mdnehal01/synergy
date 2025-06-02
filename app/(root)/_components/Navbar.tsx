@@ -4,7 +4,6 @@ import Image from 'next/image';
 import React from 'react'
 import Logo from "@/public/images/Logo.png";
 import { useRouter } from 'next/navigation';
-import { useConvexAuth } from 'convex/react';
 import { SignInButton, UserButton, useUser } from '@clerk/clerk-react';
 import { BiSun } from 'react-icons/bi';
 import { Button } from '@/components/ui/button';

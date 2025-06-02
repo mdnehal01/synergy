@@ -1,7 +1,7 @@
 "use client"
 import { cn } from '@/lib/utils';
 import { ChevronsLeft, MenuIcon, Search, Settings } from 'lucide-react'
-import { useParams, usePathname } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { ElementRef, MouseEvent, useEffect, useRef, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts';
 import UserItem from './UserItem';
@@ -19,9 +19,10 @@ import Navbar from './navbar';
 
 const Navigation = ()  => {
     const pathname = usePathname();
-
+    const router = useRouter();
     const isMobile = useMediaQuery("(max-width: 768px)")
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const documents = (api.documents.getsidebar);
     const create = useMutation(api.documents.create) 
 
@@ -33,12 +34,14 @@ const Navigation = ()  => {
     const params = useParams();
     const search = useSearch()
 
+    
     useEffect(() => {
         if(isMobile){
             collapse()
         }else{
             resetWidth();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[isMobile])
 
     useEffect(() => {
@@ -63,6 +66,7 @@ const Navigation = ()  => {
 
     const handleMouseUp = () => {   
         isResizingRef.current = false;
+        // @ts-expect-error err
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
     }
@@ -72,6 +76,7 @@ const Navigation = ()  => {
         e.stopPropagation();
 
         isResizingRef.current = true;
+        // @ts-expect-error err
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
     } 
@@ -109,6 +114,7 @@ const Navigation = ()  => {
 
     const handleCreate = () => {
         const promise = create({ title:"Untitled" })
+        .then((documentId) => router.push(`/documents/${documentId}`))
         toast.promise(promise, {
             loading: "Creating a new note...",
             success: "New note created!",
@@ -172,7 +178,8 @@ const Navigation = ()  => {
 
                 {/* THAT SIDE one which can be used to Extend sidebar */}
                 <div 
-                    onMouseDown={() => handleMouseDown} 
+                    // @ts-expect-error err
+                    onMouseDown={handleMouseDown} 
                     className='opacity-0 
                         group-hover/sidebar:opacity-100 
                         transition cursor-ew-resize 
