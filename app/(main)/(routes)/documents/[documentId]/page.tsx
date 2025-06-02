@@ -1,8 +1,37 @@
+"use client"
+import Toolbar from '@/app/(main)/_components/toolbar'
+import Loader from '@/components/Loader'
+import { api } from '@/convex/_generated/api'
+import { Id } from '@/convex/_generated/dataModel'
+import { useQuery } from 'convex/react'
 import React from 'react'
 
-const DocumentId = () => {
+interface DocumentIdProps{
+  params:{
+    documentId:Id<"documents">
+  }
+}
+
+const DocumentId = ({params}:DocumentIdProps) => {
+  const document = useQuery(api.documents.getById, {
+    documentId:params.documentId
+  })
+
+  if(document === undefined){
+    return <div><Loader/></div>
+  }
+
+  if(document === null){
+    return <div>Not found</div>
+  }
+
   return (
-    <div>DocumentId</div>
+    <div className='pb-40'>
+      <div className='h-[35vh]'/>
+      <div className='md:max-w-3xl lg:max-w-4xl mx-auto'>
+        <Toolbar initialData={document}/>
+      </div>
+    </div>
   )
 }
 
