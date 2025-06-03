@@ -21,6 +21,8 @@ const DocumentId = ({params}:DocumentIdProps) => {
     })
 
     const update = useMutation(api.documents.update)
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const onChange = (content:string) => {
         update({
             id:params.documentId,
