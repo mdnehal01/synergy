@@ -5,7 +5,6 @@ import ConvexClientProvider from "@/lib/providers/convex-provider";
 import {Toaster} from 'sonner';
 import { EdgeStoreProvider } from "@/lib/edgestore";
 import { ThemeProvider } from "@/lib/providers/theme-provider";
-import { ModalProvider } from "@/lib/providers/modal-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -38,11 +37,10 @@ export default function RootLayout({
             <EdgeStoreProvider>
               <ThemeProvider
                 attribute="class"
-                defaultTheme="system"
+                defaultTheme="light"
                 enableSystem
                 disableTransitionOnChange
               >
-                <ModalProvider />
                 {children}
               </ThemeProvider>
             </EdgeStoreProvider>

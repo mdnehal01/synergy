@@ -15,7 +15,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { BiTrash } from 'react-icons/bi';
 import TrashBox from './trash-box';
 import { useSearch } from '@/hooks/use-search';
-import { useSettings } from '@/hooks/use-settings';
 import Navbar from './navbar';
 
 const Navigation = ()  => {
@@ -33,8 +32,7 @@ const Navigation = ()  => {
     const [isResetting, setIsResseting] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(isMobile); 
     const params = useParams();
-    const search = useSearch();
-    const settings = useSettings();
+    const search = useSearch()
 
     
     useEffect(() => {
@@ -147,7 +145,7 @@ const Navigation = ()  => {
                     <Item
                         label='Settings'
                         icon={<Settings size={15} className='mr-2'/>}
-                        onclick={settings.onOpen} 
+                        onclick={() => {}} 
                     />
 
                     <Item
