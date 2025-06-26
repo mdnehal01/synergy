@@ -5,7 +5,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { ChevronDown, ChevronRight, CommandIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -23,7 +23,6 @@ interface ItemProps {
   isSearch?: boolean;
   level?: number;
   onExpand?: () => void;
-  hasChildren?: boolean;
 }
 
 type ItemComponent = React.FC<ItemProps> & {
@@ -41,13 +40,19 @@ const Item: ItemComponent = ({
   isSearch,
   level,
   onExpand,
-  hasChildren = false,
 }) => {
 
   const router = useRouter();
   const create = useMutation(api.documents.create );
   const archive = useMutation(api.documents.archive);
   const { user } = useUser();
+
+  // Query to check if this document has children
+  const children = useQuery(api.documents.getsidebar, {
+    parentDocument: id
+  });
+  
+  const hasChildren = children && children.length > 0;
 
   const handleExpand = (event: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
     event.stopPropagation();
