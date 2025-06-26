@@ -53,6 +53,7 @@ const Item: ItemComponent = ({
   });
 
   const hasChildren = childDocuments && childDocuments.length > 0;
+  const isLoadingChildren = childDocuments === undefined && !!id;
 
   const handleExpand = (event: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
     event.stopPropagation();
@@ -112,14 +113,20 @@ const Item: ItemComponent = ({
     >
       {/* Always render the chevron container div to maintain consistent spacing */}
       <div className="w-4 h-full flex items-center justify-center mr-1 shrink-0">
-        {!!id && hasChildren && (
-          <div
-            role="button"
-            onClick={handleExpand}
-            className="h-full w-full rounded-sm hover:bg-theme-blue/20 hover:text-white flex items-center justify-center"
-          >
-            {ChevronIcon}
-          </div>
+        {!!id && (
+          <>
+            {isLoadingChildren ? (
+              <Skeleton className="h-3 w-3 bg-white/20" />
+            ) : hasChildren ? (
+              <div
+                role="button"
+                onClick={handleExpand}
+                className="h-full w-full rounded-sm hover:bg-theme-blue/20 hover:text-white flex items-center justify-center"
+              >
+                {ChevronIcon}
+              </div>
+            ) : null}
+          </>
         )}
       </div>
 
@@ -171,6 +178,9 @@ Item.Skeleton = function ItemSkeleton({ level }: { level?: number }) {
       className="flex items-center gap-2 py-1"
       style={{ paddingLeft: level ? `${level * 12 + 12}px` : "12px" }}
     >
+      <div className="w-4 h-full flex items-center justify-center mr-1 shrink-0">
+        <Skeleton className="h-3 w-3 bg-white/20" />
+      </div>
       <Skeleton className="h-4 w-4" />
       <Skeleton className="h-4 w-[30%]" />
     </div>
