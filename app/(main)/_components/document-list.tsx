@@ -35,6 +35,17 @@ export const DocumentList:React.FC<DocumentListProps> = ({
         parentDocument: parentDocumentId
     });
 
+    // Query to check if each document has children
+    const documentsWithChildren = documents?.map(doc => {
+        const children = useQuery(api.documents.getsidebar, {
+            parentDocument: doc._id
+        });
+        return {
+            ...doc,
+            hasChildren: children && children.length > 0
+        };
+    });
+
     const onRedirect = (documentId:string) => {
         router.push(`/documents/${documentId}`);
     };
@@ -58,14 +69,14 @@ export const DocumentList:React.FC<DocumentListProps> = ({
             <p 
                 style={{ paddingLeft: level ? `${(level * 12) + 25}px` : undefined }}
                 className={cn(
-                    "hidden text-sm font-medium text-white/80",
+                    "hidden text-sm font-medium text-white/80 dark:text-neutral-400",
                     expanded && "last:block",
                     level === 0 && 'hidden'
                 )}
             >
                 No pages inside
             </p>
-            {documents.map((document) => (
+            {documentsWithChildren?.map((document) => (
                 <div key={document._id}>
                     <Item
                         id={document._id}
@@ -77,6 +88,7 @@ export const DocumentList:React.FC<DocumentListProps> = ({
                         level={level}
                         onExpand={()=>onExpand(document._id)}
                         expanded={expanded[document._id]}
+                        hasChildren={document.hasChildren}
                     />
                     {expanded[document._id] && (
                         <DocumentList

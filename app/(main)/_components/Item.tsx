@@ -23,6 +23,7 @@ interface ItemProps {
   isSearch?: boolean;
   level?: number;
   onExpand?: () => void;
+  hasChildren?: boolean;
 }
 
 type ItemComponent = React.FC<ItemProps> & {
@@ -40,6 +41,7 @@ const Item: ItemComponent = ({
   isSearch,
   level,
   onExpand,
+  hasChildren = false,
 }) => {
 
   const router = useRouter();
@@ -53,9 +55,9 @@ const Item: ItemComponent = ({
   }
 
   const ChevronIcon = expanded ? (
-    <ChevronDown className="h-4 w-4 shrink-0 text-white" />
+    <ChevronDown className="h-4 w-4 shrink-0 text-white dark:text-neutral-300" />
   ) : (
-    <ChevronRight className="h-4 w-4 shrink-0 text-white" />
+    <ChevronRight className="h-4 w-4 shrink-0 text-white dark:text-neutral-300" />
   );
 
   const onCreate = (
@@ -98,12 +100,12 @@ const Item: ItemComponent = ({
       role="button"
       style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
       className={cn(
-        "group min-h-[27px] py-1 pr-3 text-sm w-full hover:bg-theme-lightgreen/30 flex items-center text-white font-medium",
+        "group min-h-[27px] py-1 pr-3 text-sm w-full hover:bg-theme-lightgreen/30 flex items-center text-white dark:text-neutral-300 font-medium",
         isActive && "bg-theme-lightgreen/30 text-theme-lightgreen"
       )}
       onClick={onclick}
     >
-      {!!id && (
+      {!!id && hasChildren && (
         <div
           role="button"
           onClick={handleExpand}
