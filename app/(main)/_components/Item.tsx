@@ -5,7 +5,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { ChevronDown, ChevronRight, CommandIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -47,22 +47,15 @@ const Item: ItemComponent = ({
   const archive = useMutation(api.documents.archive);
   const { user } = useUser();
 
-  // Query to check if this document has children
-  const children = useQuery(api.documents.getsidebar, {
-    parentDocument: id
-  });
-  
-  const hasChildren = children && children.length > 0;
-
   const handleExpand = (event: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
     event.stopPropagation();
     onExpand?.();
   }
 
   const ChevronIcon = expanded ? (
-    <ChevronDown className="h-4 w-4 shrink-0 text-white dark:text-neutral-300" />
+    <ChevronDown className="h-4 w-4 shrink-0 text-white" />
   ) : (
-    <ChevronRight className="h-4 w-4 shrink-0 text-white dark:text-neutral-300" />
+    <ChevronRight className="h-4 w-4 shrink-0 text-white" />
   );
 
   const onCreate = (
@@ -105,12 +98,12 @@ const Item: ItemComponent = ({
       role="button"
       style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
       className={cn(
-        "group min-h-[27px] py-1 pr-3 text-sm w-full hover:bg-theme-lightgreen/30 flex items-center text-white dark:text-neutral-300 font-medium",
+        "group min-h-[27px] py-1 pr-3 text-sm w-full hover:bg-theme-lightgreen/30 flex items-center text-white font-medium",
         isActive && "bg-theme-lightgreen/30 text-theme-lightgreen"
       )}
       onClick={onclick}
     >
-      {!!id && hasChildren && (
+      {!!id && (
         <div
           role="button"
           onClick={handleExpand}

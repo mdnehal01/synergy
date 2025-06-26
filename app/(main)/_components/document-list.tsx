@@ -58,14 +58,14 @@ export const DocumentList:React.FC<DocumentListProps> = ({
             <p 
                 style={{ paddingLeft: level ? `${(level * 12) + 25}px` : undefined }}
                 className={cn(
-                    "hidden text-sm font-medium text-white/80 dark:text-neutral-400",
+                    "hidden text-sm font-medium text-white/80",
                     expanded && "last:block",
                     level === 0 && 'hidden'
                 )}
             >
                 No pages inside
             </p>
-            {documents?.map((document) => (
+            {documents.map((document) => (
                 <div key={document._id}>
                     <Item
                         id={document._id}
