@@ -16,6 +16,7 @@ import { BiTrash } from 'react-icons/bi';
 import TrashBox from './trash-box';
 import { useSearch } from '@/hooks/use-search';
 import Navbar from './navbar';
+import SettingsModal from './settings-modal';
 
 const Navigation = ()  => {
     const pathname = usePathname();
@@ -33,6 +34,7 @@ const Navigation = ()  => {
     const [isCollapsed, setIsCollapsed] = useState(isMobile); 
     const params = useParams();
     const search = useSearch()
+    const [showSettings, setShowSettings] = useState(false);
 
     
     useEffect(() => {
@@ -145,7 +147,7 @@ const Navigation = ()  => {
                     <Item
                         label='Settings'
                         icon={<Settings size={15} className='mr-2'/>}
-                        onclick={() => {}} 
+                        onclick={() => setShowSettings(true)} 
                     />
 
                     <Item
@@ -207,6 +209,11 @@ const Navigation = ()  => {
                 </nav>
                 )}
             </div>
+
+            <SettingsModal 
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+            />
         </>
     )
 }
