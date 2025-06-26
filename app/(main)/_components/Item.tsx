@@ -114,17 +114,17 @@ const Item: ItemComponent = ({
         <div
           role="button"
           onClick={handleExpand}
-          className="h-full rounded-sm hover:bg-theme-blue/20 hover:text-white mr-1"
+          className="h-full rounded-sm hover:bg-theme-blue/20 hover:text-white mr-1 flex items-center justify-center w-4"
         >
           {ChevronIcon}
         </div>
       )}
 
       {!!id && !hasChildren && (
-        <div className="h-4 w-4 mr-1" />
+        <div className="w-4 mr-1 flex items-center justify-center" />
       )}
 
-      <div className="mr-2">{documentIcon || icon}</div>
+      <div className="mr-2 flex items-center justify-center">{documentIcon || icon}</div>
       <span className="truncate">{label}</span>
 
       {isSearch && (
