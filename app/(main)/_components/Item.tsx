@@ -5,7 +5,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { ChevronDown, ChevronRight, CommandIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -46,6 +46,13 @@ const Item: ItemComponent = ({
   const create = useMutation(api.documents.create );
   const archive = useMutation(api.documents.archive);
   const { user } = useUser();
+
+  // Query to check if this document has children
+  const childDocuments = useQuery(api.documents.getsidebar, {
+    parentDocument: id
+  });
+
+  const hasChildren = childDocuments && childDocuments.length > 0;
 
   const handleExpand = (event: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
     event.stopPropagation();
@@ -103,7 +110,7 @@ const Item: ItemComponent = ({
       )}
       onClick={onclick}
     >
-      {!!id && (
+      {!!id && hasChildren && (
         <div
           role="button"
           onClick={handleExpand}
@@ -111,6 +118,10 @@ const Item: ItemComponent = ({
         >
           {ChevronIcon}
         </div>
+      )}
+
+      {!!id && !hasChildren && (
+        <div className="h-4 w-4 mr-1" />
       )}
 
       <div className="mr-2">{documentIcon || icon}</div>
