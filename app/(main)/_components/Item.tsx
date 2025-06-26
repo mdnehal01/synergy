@@ -110,21 +110,20 @@ const Item: ItemComponent = ({
       )}
       onClick={onclick}
     >
-      {!!id && hasChildren && (
-        <div
-          role="button"
-          onClick={handleExpand}
-          className="h-full rounded-sm hover:bg-theme-blue/20 hover:text-white mr-1 flex items-center justify-center w-4"
-        >
-          {ChevronIcon}
-        </div>
-      )}
+      {/* Always render the chevron container div to maintain consistent spacing */}
+      <div className="w-4 h-full flex items-center justify-center mr-1 shrink-0">
+        {!!id && hasChildren && (
+          <div
+            role="button"
+            onClick={handleExpand}
+            className="h-full w-full rounded-sm hover:bg-theme-blue/20 hover:text-white flex items-center justify-center"
+          >
+            {ChevronIcon}
+          </div>
+        )}
+      </div>
 
-      {!!id && !hasChildren && (
-        <div className="w-4 mr-1 flex items-center justify-center" />
-      )}
-
-      <div className="mr-2 flex items-center justify-center">{documentIcon || icon}</div>
+      <div className="mr-2 flex items-center justify-center shrink-0">{documentIcon || icon}</div>
       <span className="truncate">{label}</span>
 
       {isSearch && (
