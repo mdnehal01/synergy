@@ -1,12 +1,20 @@
 "use client"
 import Loader from "@/components/Loader";
 import { useUser } from "@clerk/clerk-react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Navigation from "./_components/Navigation";
 import { SearchCommand } from "@/components/search-command";
 
 const MainLayout = ({children} : {children:React.ReactNode}) => {
     const {isLoaded, isSignedIn} = useUser();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (isLoaded && !isSignedIn) {
+            router.push("/");
+        }
+    }, [isLoaded, isSignedIn, router]);
 
     if(!isLoaded){
         return (
@@ -17,7 +25,11 @@ const MainLayout = ({children} : {children:React.ReactNode}) => {
     }
 
     if(!isSignedIn){
-        redirect("/")
+        return (
+            <div>
+                <Loader/>
+            </div>
+        )
     }
 
     return (
@@ -31,4 +43,4 @@ const MainLayout = ({children} : {children:React.ReactNode}) => {
     )
 }
 
-export default MainLayout; 
+export default MainLayout;
