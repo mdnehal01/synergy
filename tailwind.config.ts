@@ -15,7 +15,7 @@ const config: Config = {
 			theme: {
 				green: 'var(--theme-green, #017149)',
 				blue: 'var(--theme-blue, #001D2D)',
-				lightgreen: 'var(--theme-lightgreen, #01FF5A)'
+				lightgreen: 'var(--theme-lightgreen, #06923E)'
 			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',

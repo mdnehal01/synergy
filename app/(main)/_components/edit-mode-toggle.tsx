@@ -1,40 +1,51 @@
 "use client"
 
-import { Button } from '@/components/ui/button'
-import { Edit, Eye } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import React from 'react'
 
 interface EditModeToggleProps {
-    isEditMode: boolean
-    onToggle: () => void
+  isEditMode: boolean
+  onToggle: () => void
 }
 
 const EditModeToggle: React.FC<EditModeToggleProps> = ({
-    isEditMode,
-    onToggle
+  isEditMode,
+  onToggle,
 }) => {
-    return (
-        <div className="fixed top-20 right-6 z-50">
-            <Button
-                onClick={onToggle}
-                variant={isEditMode ? "default" : "outline"}
-                size="sm"
-                className="flex items-center gap-2 shadow-lg"
-            >
-                {isEditMode ? (
-                    <>
-                        <Edit className="h-4 w-4" />
-                        Edit Mode
-                    </>
-                ) : (
-                    <>
-                        <Eye className="h-4 w-4" />
-                        View Mode
-                    </>
-                )}
-            </Button>
-        </div>
-    )
+  return (
+    <div className={`absolute top-[50px] z-50 left-1/2 right-0 px-32 -translate-x-1/2 w-full ${!isEditMode ? 'bg-yellow-100 dark:bg-neutral-950 shadow': 'bg-transparent shadow-none'} py-2 flex items-center justify-between`}>
+      {/* Mode Label with Icon */}
+      <div className="flex items-center gap-2 text-sm font-medium">
+        {isEditMode ? (
+          <>
+
+          </>
+        ) : (
+          <>
+            <p>This page is in </p>
+            <Eye className="h-4 w-4" />
+            View Mode
+            <p>Press toggle to turn to edit mode</p>
+          </>
+        )}
+      </div>
+
+      {/* Toggle Switch */}
+      <label className="relative inline-block w-12 h-6 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={isEditMode}
+          onChange={onToggle}
+          className="peer sr-only"
+        />
+        <div className="w-full h-full rounded-full bg-gray-300 peer-checked:bg-gray-900 dark:peer-checked:bg-neutral-100 transition-colors"></div>
+        <div className="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-theme-lightgreen transition-transform peer-checked:translate-x-6"></div>
+        {isEditMode &&
+            <p className='w-44 text-xs'>Edit On</p>
+        }
+      </label>
+    </div>
+  )
 }
 
 export default EditModeToggle
