@@ -67,32 +67,6 @@ html, body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-  .yellow {
-    --background: 45 100% 96%;
-    --foreground: 45 84% 8%;
-    --card: 45 100% 98%;
-    --card-foreground: 45 84% 8%;
-    --popover: 45 100% 98%;
-    --popover-foreground: 45 84% 8%;
-    --primary: 45 100% 50%;
-    --primary-foreground: 45 84% 8%;
-    --secondary: 45 60% 88%;
-    --secondary-foreground: 45 84% 12%;
-    --muted: 45 60% 88%;
-    --muted-foreground: 45 30% 35%;
-    --accent: 45 60% 88%;
-    --accent-foreground: 45 84% 12%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 45 60% 82%;
-    --input: 45 60% 82%;
-    --ring: 45 100% 50%;
-    --chart-1: 45 100% 50%;
-    --chart-2: 35 100% 45%;
-    --chart-3: 55 100% 45%;
-    --chart-4: 25 100% 55%;
-    --chart-5: 65 100% 55%;
-  }
 }
 
 
