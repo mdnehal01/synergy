@@ -46,7 +46,7 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     }, [editor, editable]);
 
     return (
-        <div className={editable ? "" : "pointer-events-none select-none"}>
+        <div className={editable ? "" : "cursor-default"}>
             <BlockNoteView
                 editor={editor}
                 editable={editable}
