@@ -24,7 +24,7 @@ interface ItemProps {
   level?: number;
   onExpand?: () => void;
   parentDocument?: Id<"documents">;
-  onReorder?: (documentId: Id<"documents">, newOrder: number) => void;
+  onReorder?: (documentId: Id<"documents">, targetId: Id<"documents">, position: "before" | "after") => void;
 }
 
 type ItemComponent = React.FC<ItemProps> & {
@@ -109,7 +109,7 @@ const Item: ItemComponent = ({
 
   // Drag and Drop handlers
   const handleDragStart = (e: React.DragEvent) => {
-    if (!id) return;
+    if (!id || isSearch) return;
     setIsDragging(true);
     e.dataTransfer.setData("text/plain", id);
     e.dataTransfer.effectAllowed = "move";
@@ -120,37 +120,39 @@ const Item: ItemComponent = ({
   };
 
   const handleDragOver = (e: React.DragEvent) => {
+    if (!id || isSearch) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     setDragOver(true);
   };
 
-  const handleDragLeave = () => {
-    setDragOver(false);
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Only remove drag over if we're actually leaving the element
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDragOver(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setDragOver(false);
     
+    if (!id || isSearch || !onReorder) return;
+    
     const draggedId = e.dataTransfer.getData("text/plain") as Id<"documents">;
-    if (!id || draggedId === id || !onReorder) return;
+    if (draggedId === id) return;
 
-    // Find the current position of the dropped item
-    const currentElement = e.currentTarget as HTMLElement;
-    const rect = currentElement.getBoundingClientRect();
+    // Determine if we should place before or after based on drop position
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const midpoint = rect.top + rect.height / 2;
-    const dropPosition = e.clientY < midpoint ? 0 : 1;
+    const position = e.clientY < midpoint ? "before" : "after";
 
-    // Get the index of the current item and calculate new position
-    const parentElement = currentElement.parentElement;
-    if (!parentElement) return;
-
-    const allItems = Array.from(parentElement.children);
-    const currentIndex = allItems.indexOf(currentElement);
-    const newIndex = currentIndex + dropPosition;
-
-    onReorder(draggedId, newIndex);
+    onReorder(draggedId, id, position);
   };
 
   return (
@@ -159,9 +161,9 @@ const Item: ItemComponent = ({
       style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
       className={cn(
         "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
-        "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:bg-white",
+        "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:border-l-2 hover:border-theme-lightgreen",
         isActive && "bg-theme-lightgreen/30 text-theme-lightgreen border-l-2 border-theme-lightgreen",
-        isDragging && "opacity-50",
+        isDragging && "opacity-50 transform rotate-1",
         dragOver && "bg-theme-lightgreen/40 border-t-2 border-theme-lightgreen"
       )}
       onClick={onclick}
@@ -174,7 +176,10 @@ const Item: ItemComponent = ({
     >
       {/* Drag handle - only show for documents that can be dragged */}
       {!!id && !isSearch && (
-        <div className="opacity-0 group-hover:opacity-100 mr-1 cursor-grab active:cursor-grabbing">
+        <div 
+          className="opacity-0 group-hover:opacity-100 mr-1 cursor-grab active:cursor-grabbing transition-opacity"
+          onMouseDown={(e) => e.stopPropagation()}
+        >
           <GripVertical className="h-3 w-3 text-white/50 hover:text-theme-lightgreen transition-colors" />
         </div>
       )}

@@ -154,8 +154,8 @@ export const create = mutation({
 export const reorderDocuments = mutation({
   args: {
     documentId: v.id("documents"),
-    newOrder: v.number(),
-    parentDocument: v.optional(v.id("documents"))
+    targetDocumentId: v.id("documents"),
+    position: v.union(v.literal("before"), v.literal("after"))
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -164,19 +164,32 @@ export const reorderDocuments = mutation({
     }
     const userId = identity.subject;
 
-    // Verify the document belongs to the user
-    const document = await ctx.db.get(args.documentId);
-    if (!document || document.userId !== userId) {
+    // Verify both documents belong to the user
+    const [sourceDoc, targetDoc] = await Promise.all([
+      ctx.db.get(args.documentId),
+      ctx.db.get(args.targetDocumentId)
+    ]);
+
+    if (!sourceDoc || !targetDoc) {
+      throw new Error("Document not found");
+    }
+
+    if (sourceDoc.userId !== userId || targetDoc.userId !== userId) {
       throw new Error("Unauthorized");
     }
 
-    // Get all siblings
+    // Make sure they have the same parent
+    if (sourceDoc.parentDocument !== targetDoc.parentDocument) {
+      throw new Error("Documents must have the same parent");
+    }
+
+    // Get all siblings in the same parent
     const siblings = await ctx.db
       .query("documents")
       .withIndex("by_user_parent", (q) => 
         q
           .eq("userId", userId)
-          .eq("parentDocument", args.parentDocument)
+          .eq("parentDocument", sourceDoc.parentDocument)
       )
       .filter((q) => 
         q.eq(q.field("isArchived"), false)
@@ -184,23 +197,33 @@ export const reorderDocuments = mutation({
       .collect();
 
     // Sort siblings by current order
-    const sortedSiblings = siblings
-      .filter(doc => doc._id !== args.documentId)
-      .sort((a, b) => {
-        if (a.order !== undefined && b.order !== undefined) {
-          return a.order - b.order;
-        }
-        if (a.order !== undefined) return -1;
-        if (b.order !== undefined) return 1;
-        return b._creationTime - a._creationTime;
-      });
+    const sortedSiblings = siblings.sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return a._creationTime - b._creationTime;
+    });
 
-    // Insert the moved document at the new position
-    sortedSiblings.splice(args.newOrder, 0, document);
+    // Remove the source document from the list
+    const filteredSiblings = sortedSiblings.filter(doc => doc._id !== args.documentId);
+    
+    // Find the target position
+    const targetIndex = filteredSiblings.findIndex(doc => doc._id === args.targetDocumentId);
+    if (targetIndex === -1) {
+      throw new Error("Target document not found in siblings");
+    }
+
+    // Calculate new position
+    const newIndex = args.position === "before" ? targetIndex : targetIndex + 1;
+    
+    // Insert the source document at the new position
+    filteredSiblings.splice(newIndex, 0, sourceDoc);
 
     // Update all documents with new order
-    const updates = sortedSiblings.map((doc, index) => 
-      ctx.db.patch(doc._id, { order: index })
+    const updates = filteredSiblings.map((doc, index) => 
+      ctx.db.patch(doc._id, { order: index + 1 })
     );
 
     await Promise.all(updates);

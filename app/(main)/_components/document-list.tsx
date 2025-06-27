@@ -41,12 +41,16 @@ export const DocumentList:React.FC<DocumentListProps> = ({
         router.push(`/documents/${documentId}`);
     };
 
-    const handleReorder = async (documentId: Id<"documents">, newOrder: number) => {
+    const handleReorder = async (
+        documentId: Id<"documents">, 
+        targetId: Id<"documents">, 
+        position: "before" | "after"
+    ) => {
         try {
             await reorderDocuments({
                 documentId,
-                newOrder,
-                parentDocument: parentDocumentId
+                targetDocumentId: targetId,
+                position
             });
             toast.success("Document reordered successfully!");
         } catch (error) {
