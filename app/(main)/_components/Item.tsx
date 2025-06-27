@@ -60,9 +60,9 @@ const Item: ItemComponent = ({
   }
 
   const ChevronIcon = expanded ? (
-    <ChevronDown className="h-4 w-4 shrink-0 text-white" />
+    <ChevronDown className="h-4 w-4 shrink-0 text-white group-hover:text-theme-blue transition-colors" />
   ) : (
-    <ChevronRight className="h-4 w-4 shrink-0 text-white" />
+    <ChevronRight className="h-4 w-4 shrink-0 text-white group-hover:text-theme-blue transition-colors" />
   );
 
   const onCreate = (
@@ -105,8 +105,9 @@ const Item: ItemComponent = ({
       role="button"
       style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
       className={cn(
-        "group min-h-[27px] py-1 pr-3 text-sm w-full hover:bg-theme-lightgreen/30 flex items-center text-white font-medium",
-        isActive && "bg-theme-lightgreen/30 text-theme-lightgreen"
+        "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium",
+        "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:border-l-2 hover:border-theme-lightgreen",
+        isActive && "bg-theme-lightgreen/30 text-theme-lightgreen border-l-2 border-theme-lightgreen"
       )}
       onClick={onclick}
     >
@@ -116,18 +117,20 @@ const Item: ItemComponent = ({
           <div
             role="button"
             onClick={handleExpand}
-            className="h-full w-full rounded-sm hover:bg-theme-blue/20 hover:text-white flex items-center justify-center"
+            className="h-full w-full rounded-sm hover:bg-theme-lightgreen/30 hover:text-theme-blue flex items-center justify-center transition-colors"
           >
             {ChevronIcon}
           </div>
         )}
       </div>
 
-      <div className="mr-2 flex items-center justify-center shrink-0">{documentIcon || icon}</div>
-      <span className="truncate">{label}</span>
+      <div className="mr-2 flex items-center justify-center shrink-0 group-hover:text-theme-green transition-colors">
+        {documentIcon || icon}
+      </div>
+      <span className="truncate group-hover:text-theme-green transition-colors">{label}</span>
 
       {isSearch && (
-        <kbd className="ml-auto pointer-events-none flex h-5 select-none items-center gap-1 rounded border bg-theme-lightgreen px-1.5 font-mono text-[10px] font-medium text-black opacity-100">
+        <kbd className="ml-auto pointer-events-none flex h-5 select-none items-center gap-1 rounded border bg-theme-lightgreen px-1.5 font-mono text-[10px] font-medium text-black opacity-100 group-hover:bg-theme-green group-hover:text-white transition-colors">
           <span className="text-xs">
             <CommandIcon size={10} />
           </span>
@@ -137,21 +140,28 @@ const Item: ItemComponent = ({
 
       {!!id && (
         <div className="ml-auto flex gap-x-2 items-center">
-           <div role="button" onClick={onCreate} className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-theme-blue/20">
-            <BiPlus/> 
+           <div 
+             role="button" 
+             onClick={onCreate} 
+             className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-theme-green/20 hover:text-theme-lightgreen p-1 transition-all"
+           >
+            <BiPlus className="text-white group-hover:text-theme-lightgreen transition-colors"/> 
            </div>
 
            <DropdownMenu>
             <DropdownMenuTrigger onClick={(e) => {
               e.stopPropagation();
             }} asChild>
-              <div role="button" onClick={onCreate} className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-theme-blue/20">
-                <BiDotsHorizontal size={15}/>
+              <div 
+                role="button" 
+                className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-theme-green/20 hover:text-theme-lightgreen p-1 transition-all"
+              >
+                <BiDotsHorizontal size={15} className="text-white group-hover:text-theme-lightgreen transition-colors"/>
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-60" align="start" side="right" forceMount>
-              <DropdownMenuItem onClick={onArchive}>
-                <BiTrash/>
+              <DropdownMenuItem onClick={onArchive} className="hover:bg-theme-lightgreen/10 hover:text-theme-green transition-colors">
+                <BiTrash className="mr-2"/>
                 Delete
               </DropdownMenuItem>
               <DropdownMenuSeparator/>
@@ -168,11 +178,11 @@ const Item: ItemComponent = ({
 Item.Skeleton = function ItemSkeleton({ level }: { level?: number }) {
   return (
     <div
-      className="flex items-center gap-2 py-1"
+      className="flex items-center gap-2 py-1 animate-pulse"
       style={{ paddingLeft: level ? `${level * 12 + 12}px` : "12px" }}
     >
-      <Skeleton className="h-4 w-4" />
-      <Skeleton className="h-4 w-[30%]" />
+      <Skeleton className="h-4 w-4 bg-theme-lightgreen/20" />
+      <Skeleton className="h-4 w-[30%] bg-theme-lightgreen/20" />
     </div>
   );
 };

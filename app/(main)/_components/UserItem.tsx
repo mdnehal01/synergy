@@ -9,15 +9,15 @@ const UserItem = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div role='button' className='flex items-center text-sm p-3 w-full hover:bg-theme-lightgreen/5'>
+                <div role='button' className='flex items-center text-sm p-3 w-full hover:bg-theme-lightgreen/20 hover:text-theme-green transition-all duration-200 hover:shadow-sm'>
                     <div className='gap-x-2 flex items-center max-w-[150px]'>
                         <Avatar className='h-5 w-5'>
                             <AvatarImage src={user?.imageUrl}/>
                         </Avatar>
-                        <span className='line-clamp-1'
+                        <span className='line-clamp-1 group-hover:text-theme-green transition-colors'
                         >{user?.fullName}&apos;s Synergie</span>
                     </div>
-                    <ChevronsLeftRight className='rotate-90 ml-2 text-neutral-300 h-4 w-4'/>
+                    <ChevronsLeftRight className='rotate-90 ml-2 text-neutral-300 h-4 w-4 group-hover:text-theme-lightgreen transition-colors'/>
                 </div>
             </DropdownMenuTrigger>
 
@@ -38,7 +38,7 @@ const UserItem = () => {
                     </div>
                 </div>
                 <DropdownMenuSeparator>
-                    <DropdownMenuItem asChild className='w-full cursor-pointer text-neutral-600'>
+                    <DropdownMenuItem asChild className='w-full cursor-pointer text-neutral-600 hover:bg-theme-lightgreen/10 hover:text-theme-green transition-colors'>
                         <SignOutButton>Log out</SignOutButton>
                     </DropdownMenuItem>
                 </DropdownMenuSeparator>

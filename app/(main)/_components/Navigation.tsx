@@ -129,10 +129,10 @@ const Navigation = ()  => {
                 isResetting && "transition-all duration-300 ease-in-out",
                 isMobile && "w-0"
             )}>
-                <div onClick={collapse } role='button' className={cn('group/boox text-muted-foreground h-6 w-6 rounded-sm hover:bg-theme-lightgreen absolute top-3 right-2 opacity-0 group-hover/sidebar:opacity-100',
+                <div onClick={collapse } role='button' className={cn('group/boox text-muted-foreground h-6 w-6 rounded-sm hover:bg-theme-lightgreen/20 hover:text-theme-lightgreen absolute top-3 right-2 opacity-0 group-hover/sidebar:opacity-100 transition-all',
                 isMobile && "opacity-100"
                 )}>
-                    <ChevronsLeft className='h-6 w-6 text-white group-hover/boox:text-black'/>
+                    <ChevronsLeft className='h-6 w-6 text-white group-hover/boox:text-theme-lightgreen transition-colors'/>
                 </div>
                 <div>
                     <UserItem/>
@@ -186,7 +186,7 @@ const Navigation = ()  => {
                         group-hover/sidebar:opacity-100 
                         transition cursor-ew-resize 
                         absolute h-full w-1 
-                        bg-white/50 right-0 
+                        bg-theme-lightgreen/50 hover:bg-theme-lightgreen right-0 
                         top-0'
                     onClick={resetWidth}
                     ></div>
@@ -205,7 +205,7 @@ const Navigation = ()  => {
                     />
                 ): (
                 <nav className='bg-transparent px-3 py-2 w-full'>
-                    {isCollapsed && <MenuIcon onClick={resetWidth} role='button' className='h-6 w-6 text-black'/>}
+                    {isCollapsed && <MenuIcon onClick={resetWidth} role='button' className='h-6 w-6 text-black hover:text-theme-green transition-colors'/>}
                 </nav>
                 )}
             </div>
