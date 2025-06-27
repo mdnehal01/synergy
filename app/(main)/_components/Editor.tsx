@@ -33,7 +33,6 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     }
     
     const editor: BlockNoteEditor = useCreateBlockNote({
-        editable,
         initialContent: initialContent ? (JSON.parse(initialContent) as PartialBlock[]) : undefined,
         uploadFile: editable ? handleUpload : undefined // Disable file upload in view mode
     });
