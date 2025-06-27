@@ -106,7 +106,7 @@ const Item: ItemComponent = ({
       style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
       className={cn(
         "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium",
-        "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:border-l-2 hover:border-theme-lightgreen",
+        "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:bg-white",
         isActive && "bg-theme-lightgreen/30 text-theme-lightgreen border-l-2 border-theme-lightgreen"
       )}
       onClick={onclick}

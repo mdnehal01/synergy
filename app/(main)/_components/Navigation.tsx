@@ -153,7 +153,7 @@ const Navigation = ()  => {
                     <Item
                         onclick={handleCreate} 
                         label="New Page"
-                        icon={<GrAddCircle className='shrink-0 h-[18px] mr-2 text-white'/>}
+                        icon={<GrAddCircle className='shrink-0 h-[18px] mr-2'/>}
                     />
                 </div>
 
