@@ -42,7 +42,6 @@ const Item: ItemComponent = ({
   isSearch,
   level,
   onExpand,
-  parentDocument,
   onReorder,
 }) => {
 
@@ -161,9 +160,9 @@ const Item: ItemComponent = ({
       style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
       className={cn(
         "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
-        "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:border-l-2 hover:border-theme-lightgreen",
-        isActive && "bg-theme-lightgreen/30 text-theme-lightgreen border-l-2 border-theme-lightgreen",
-        isDragging && "opacity-50 transform rotate-1",
+        "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:bg-white",
+        isActive && "bg-theme-lightgreen/30 bg-white text-theme-green",
+        isDragging && "opacity-50 scale-105",
         dragOver && "bg-theme-lightgreen/40 border-t-2 border-theme-lightgreen"
       )}
       onClick={onclick}
@@ -254,8 +253,8 @@ Item.Skeleton = function ItemSkeleton({ level }: { level?: number }) {
       className="flex items-center gap-2 py-1 animate-pulse"
       style={{ paddingLeft: level ? `${level * 12 + 12}px` : "12px" }}
     >
-      <Skeleton className="h-4 w-4 bg-theme-lightgreen/20" />
-      <Skeleton className="h-4 w-[30%] bg-theme-lightgreen/20" />
+      <Skeleton className="h-4 w-4 bg-theme-lightgreen" />
+      <Skeleton className="h-4 w-[60%] bg-theme-lightgreen" />
     </div>
   );
 };
