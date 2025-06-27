@@ -2,12 +2,13 @@
 
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import Item from "./Item";
 import { FileIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface DocumentListProps{
     parentDocumentId?:Id<"documents">;
@@ -21,6 +22,7 @@ export const DocumentList:React.FC<DocumentListProps> = ({
 }) => {
     const params = useParams();
     const router = useRouter();
+    const reorderDocuments = useMutation(api.documents.reorderDocuments);
 
     const [expanded, setExpanded] = useState<Record<string,boolean>>({})
     
@@ -37,6 +39,20 @@ export const DocumentList:React.FC<DocumentListProps> = ({
 
     const onRedirect = (documentId:string) => {
         router.push(`/documents/${documentId}`);
+    };
+
+    const handleReorder = async (documentId: Id<"documents">, newOrder: number) => {
+        try {
+            await reorderDocuments({
+                documentId,
+                newOrder,
+                parentDocument: parentDocumentId
+            });
+            toast.success("Document reordered successfully!");
+        } catch (error) {
+            toast.error("Failed to reorder document");
+            console.error("Reorder error:", error);
+        }
     };
 
     if(documents === undefined) {
@@ -77,6 +93,8 @@ export const DocumentList:React.FC<DocumentListProps> = ({
                         level={level}
                         onExpand={()=>onExpand(document._id)}
                         expanded={expanded[document._id]}
+                        parentDocument={parentDocumentId}
+                        onReorder={handleReorder}
                     />
                     {expanded[document._id] && (
                         <DocumentList

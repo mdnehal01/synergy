@@ -92,10 +92,17 @@ export const getsidebar = query({
       .filter((q) => 
         q.eq(q.field("isArchived"), false)
       )
-      .order("desc")
       .collect()
-      
-      return documents
+
+    // Sort by order field, then by creation time
+    return documents.sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return b._creationTime - a._creationTime;
+    });
   }
 })
 
@@ -113,18 +120,94 @@ export const create = mutation({
         
         const userId = identity.subject;
 
+        // Get the highest order number for siblings
+        const siblings = await ctx.db
+          .query("documents")
+          .withIndex("by_user_parent", (q) => 
+            q
+              .eq("userId", userId)
+              .eq("parentDocument", args.parentDocument)
+          )
+          .filter((q) => 
+            q.eq(q.field("isArchived"), false)
+          )
+          .collect();
+
+        const maxOrder = siblings.reduce((max, doc) => 
+          Math.max(max, doc.order || 0), 0
+        );
+
         const document = await ctx.db.insert("documents", {
             title: args.title,
             parentDocument: args.parentDocument,
             userId,
             isArchived:false,
-            isPublished:false 
+            isPublished:false,
+            order: maxOrder + 1
         })
 
         return document;
 
     }
 }); 
+
+export const reorderDocuments = mutation({
+  args: {
+    documentId: v.id("documents"),
+    newOrder: v.number(),
+    parentDocument: v.optional(v.id("documents"))
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    // Verify the document belongs to the user
+    const document = await ctx.db.get(args.documentId);
+    if (!document || document.userId !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    // Get all siblings
+    const siblings = await ctx.db
+      .query("documents")
+      .withIndex("by_user_parent", (q) => 
+        q
+          .eq("userId", userId)
+          .eq("parentDocument", args.parentDocument)
+      )
+      .filter((q) => 
+        q.eq(q.field("isArchived"), false)
+      )
+      .collect();
+
+    // Sort siblings by current order
+    const sortedSiblings = siblings
+      .filter(doc => doc._id !== args.documentId)
+      .sort((a, b) => {
+        if (a.order !== undefined && b.order !== undefined) {
+          return a.order - b.order;
+        }
+        if (a.order !== undefined) return -1;
+        if (b.order !== undefined) return 1;
+        return b._creationTime - a._creationTime;
+      });
+
+    // Insert the moved document at the new position
+    sortedSiblings.splice(args.newOrder, 0, document);
+
+    // Update all documents with new order
+    const updates = sortedSiblings.map((doc, index) => 
+      ctx.db.patch(doc._id, { order: index })
+    );
+
+    await Promise.all(updates);
+
+    return { success: true };
+  }
+});
 
 export const getTrash = query({
   handler: async (ctx) => {

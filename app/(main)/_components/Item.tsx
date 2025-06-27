@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronDown, ChevronRight, CommandIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, CommandIcon, GripVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { BiDotsHorizontal, BiPlus, BiTrash } from "react-icons/bi";
 import { toast } from "sonner";
 
@@ -23,6 +23,8 @@ interface ItemProps {
   isSearch?: boolean;
   level?: number;
   onExpand?: () => void;
+  parentDocument?: Id<"documents">;
+  onReorder?: (documentId: Id<"documents">, newOrder: number) => void;
 }
 
 type ItemComponent = React.FC<ItemProps> & {
@@ -40,12 +42,17 @@ const Item: ItemComponent = ({
   isSearch,
   level,
   onExpand,
+  parentDocument,
+  onReorder,
 }) => {
 
   const router = useRouter();
   const create = useMutation(api.documents.create );
   const archive = useMutation(api.documents.archive);
   const { user } = useUser();
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
   // Query to check if this document has children
   const childDocuments = useQuery(api.documents.getsidebar, {
@@ -100,17 +107,78 @@ const Item: ItemComponent = ({
     })
   }
 
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent) => {
+    if (!id) return;
+    setIsDragging(true);
+    e.dataTransfer.setData("text/plain", id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    
+    const draggedId = e.dataTransfer.getData("text/plain") as Id<"documents">;
+    if (!id || draggedId === id || !onReorder) return;
+
+    // Find the current position of the dropped item
+    const currentElement = e.currentTarget as HTMLElement;
+    const rect = currentElement.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    const dropPosition = e.clientY < midpoint ? 0 : 1;
+
+    // Get the index of the current item and calculate new position
+    const parentElement = currentElement.parentElement;
+    if (!parentElement) return;
+
+    const allItems = Array.from(parentElement.children);
+    const currentIndex = allItems.indexOf(currentElement);
+    const newIndex = currentIndex + dropPosition;
+
+    onReorder(draggedId, newIndex);
+  };
+
   return (
     <div
       role="button"
       style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
       className={cn(
-        "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium",
+        "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
         "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:bg-white",
-        isActive && "bg-theme-lightgreen/30 text-theme-lightgreen border-l-2 border-theme-lightgreen"
+        isActive && "bg-theme-lightgreen/30 text-theme-lightgreen border-l-2 border-theme-lightgreen",
+        isDragging && "opacity-50",
+        dragOver && "bg-theme-lightgreen/40 border-t-2 border-theme-lightgreen"
       )}
       onClick={onclick}
+      draggable={!!id && !isSearch}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
+      {/* Drag handle - only show for documents that can be dragged */}
+      {!!id && !isSearch && (
+        <div className="opacity-0 group-hover:opacity-100 mr-1 cursor-grab active:cursor-grabbing">
+          <GripVertical className="h-3 w-3 text-white/50 hover:text-theme-lightgreen transition-colors" />
+        </div>
+      )}
+
       {/* Always render the chevron container div to maintain consistent spacing */}
       <div className="w-4 h-full flex items-center justify-center mr-1 shrink-0">
         {!!id && hasChildren && (

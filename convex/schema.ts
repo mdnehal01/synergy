@@ -10,8 +10,10 @@ export default defineSchema({
         content:v.optional(v.string()),
         coverImage:v.optional(v.string()),
         icon: v.optional(v.string()),
-        isPublished: v.boolean()
+        isPublished: v.boolean(),
+        order: v.optional(v.number())
     })
     .index("by_user", ["userId"])
     .index("by_user_parent", ["userId", "parentDocument"])
+    .index("by_user_parent_order", ["userId", "parentDocument", "order"])
 })

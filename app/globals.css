@@ -119,3 +119,37 @@ html, body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Drag and Drop Styles */
+.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.drag-over {
+  background-color: rgba(1, 255, 90, 0.1);
+  border-top: 2px solid #01FF5A;
+}
+
+/* Smooth transitions for drag operations */
+.drag-transition {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(1, 255, 90, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(1, 255, 90, 0.5);
+}
