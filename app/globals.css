@@ -12,7 +12,6 @@ html, body {
   height: 100%;
 }
 
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -69,7 +68,48 @@ html, body {
   }
 }
 
+/* Color Theme Overrides */
+[data-color-theme="blue"] {
+  --theme-green: #0066CC;
+  --theme-lightgreen: #4DA6FF;
+  --theme-blue: #003D7A;
+}
 
+[data-color-theme="purple"] {
+  --theme-green: #7C3AED;
+  --theme-lightgreen: #A78BFA;
+  --theme-blue: #5B21B6;
+}
+
+[data-color-theme="orange"] {
+  --theme-green: #EA580C;
+  --theme-lightgreen: #FB923C;
+  --theme-blue: #C2410C;
+}
+
+[data-color-theme="red"] {
+  --theme-green: #DC2626;
+  --theme-lightgreen: #F87171;
+  --theme-blue: #B91C1C;
+}
+
+[data-color-theme="pink"] {
+  --theme-green: #E11D48;
+  --theme-lightgreen: #FB7185;
+  --theme-blue: #BE185D;
+}
+
+[data-color-theme="teal"] {
+  --theme-green: #0D9488;
+  --theme-lightgreen: #5EEAD4;
+  --theme-blue: #0F766E;
+}
+
+[data-color-theme="green"] {
+  --theme-green: #059669;
+  --theme-lightgreen: #6EE7B7;
+  --theme-blue: #047857;
+}
 
 @layer base {
   * {
