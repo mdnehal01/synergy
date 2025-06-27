@@ -5,8 +5,6 @@ import {
   PartialBlock
 } from "@blocknote/core";
 
-
-
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
@@ -23,7 +21,7 @@ interface EditorProps {
   editable?: boolean;
 }
 
-const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
+const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     const { edgestore } = useEdgeStore()
 
     const handleUpload = async (file:File) => {
@@ -35,23 +33,31 @@ const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
     }
     
     const editor: BlockNoteEditor = useCreateBlockNote({
-        // @ts-expect-error err
         editable,
         initialContent: initialContent ? (JSON.parse(initialContent) as PartialBlock[]) : undefined,
-        uploadFile:handleUpload 
+        uploadFile: editable ? handleUpload : undefined // Disable file upload in view mode
     });
 
+    // Update editor editable state when prop changes
+    React.useEffect(() => {
+        if (editor) {
+            editor.isEditable = editable;
+        }
+    }, [editor, editable]);
 
-  return (
-    <div>
-      <BlockNoteView
-        editor={editor}
-        onChange={() => {
-          onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
-        }}
-      />
-    </div>
-  );
+    return (
+        <div className={editable ? "" : "pointer-events-none select-none"}>
+            <BlockNoteView
+                editor={editor}
+                editable={editable}
+                onChange={() => {
+                    if (editable) {
+                        onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
+                    }
+                }}
+            />
+        </div>
+    );
 };
 
 export default Editor;
