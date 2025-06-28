@@ -11,48 +11,70 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const apiKey = process.env.OPENAI_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
       return NextResponse.json(
-        { message: 'OpenAI API key not configured' },
+        { message: 'Gemini API key not configured' },
         { status: 500 }
       )
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Using Gemini Pro model via REST API
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-mini',
-        messages: [
+        contents: [
           {
-            role: 'system',
-            content: 'You are a helpful writing assistant. Generate high-quality, well-structured content based on the user\'s prompt. Format your response in plain text with proper paragraphs and line breaks.'
-          },
-          {
-            role: 'user',
-            content: prompt
+            parts: [
+              {
+                text: `You are a helpful writing assistant. Generate high-quality, well-structured content based on the user's prompt. Format your response in plain text with proper paragraphs and line breaks.
+
+User prompt: ${prompt}`
+              }
+            ]
           }
         ],
-        max_tokens: 1000,
-        temperature: 0.7,
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1000,
+        },
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_HARASSMENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_HATE_SPEECH",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          }
+        ]
       }),
     })
 
     if (!response.ok) {
       const error = await response.json()
-      console.error('OpenAI API error:', error)
+      console.error('Gemini API error:', error)
       return NextResponse.json(
-        { message: 'Failed to generate content from OpenAI' },
+        { message: 'Failed to generate content from Gemini' },
         { status: response.status }
       )
     }
 
     const data = await response.json()
-    const content = data.choices[0]?.message?.content
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text
 
     if (!content) {
       return NextResponse.json(

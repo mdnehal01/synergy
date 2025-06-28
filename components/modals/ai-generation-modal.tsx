@@ -50,7 +50,7 @@ export function AIGenerationModal({
 
       const data = await response.json()
       setGeneratedContent(data.content)
-      toast.success("Content generated successfully!")
+      toast.success("Content generated successfully with Gemini!")
     } catch (error) {
       console.error('AI generation error:', error)
       toast.error(error instanceof Error ? error.message : "Failed to generate content")
@@ -82,8 +82,8 @@ export function AIGenerationModal({
       <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-500" />
-            AI Content Generator
+            <Sparkles className="h-5 w-5 text-blue-500" />
+            AI Content Generator (Powered by Gemini)
           </DialogTitle>
         </DialogHeader>
         
@@ -105,17 +105,17 @@ export function AIGenerationModal({
             <Button 
               onClick={handleGenerate}
               disabled={isGenerating || !prompt.trim()}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating...
+                  Generating with Gemini...
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4 mr-2" />
-                  Generate Content
+                  Generate with Gemini
                 </>
               )}
             </Button>

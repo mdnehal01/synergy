@@ -78,11 +78,11 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
                         variant="outline"
                         size="sm"
                         onClick={handleAIGeneration}
-                        className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600"
+                        className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-none hover:from-blue-600 hover:to-purple-600"
                         disabled={aiGeneration.isGenerating}
                     >
                         <Sparkles className="h-4 w-4" />
-                        {aiGeneration.isGenerating ? "Generating..." : "AI Generate"}
+                        {aiGeneration.isGenerating ? "Generating..." : "AI Generate (Gemini)"}
                     </Button>
                 </div>
             )}
