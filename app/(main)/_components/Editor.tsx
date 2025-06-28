@@ -5,6 +5,8 @@ import {
   PartialBlock
 } from "@blocknote/core";
 
+import ReactMarkdown from 'react-markdown';
+
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
