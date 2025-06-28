@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-o4-mini',
+        model: 'gpt-o9-mini',
         messages: [
           {
             role: 'system',
