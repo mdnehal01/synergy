@@ -201,7 +201,8 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
                     )}
                 </div>
             )}
-            
+
+            <ReactMarkdown>
             <BlockNoteView
                 editor={editor}
                 editable={editable}
@@ -211,6 +212,7 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
                     }
                 }}
             />
+            </ReactMarkdown>
         </div>
     );
 };
