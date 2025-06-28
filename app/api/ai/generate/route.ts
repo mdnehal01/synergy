@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
           {
             parts: [
               {
-                text: `You are a helpful writing assistant. Generate high-quality, well-structured content based on the user's prompt. Format your response in plain text with proper paragraphs and line breaks.
+                text: `You are a helpful writing assistant. Generate high-quality, well-structured content based on the user's prompt. Format your response in plain text with proper paragraphs and line breaks in a format which can be easily supported by BlockNote.
 
 User prompt: ${prompt}`
               }
