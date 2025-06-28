@@ -1,6 +1,6 @@
 "use client";
 
-import EnhancedEditor from '@/app/(main)/_components/enhanced-editor';
+import Editor from '@/app/(main)/_components/Editor';
 import Toolbar from '@/app/(main)/_components/toolbar';
 import Cover from '@/components/cover';
 import Loader from '@/components/Loader';
@@ -45,7 +45,7 @@ const DocumentId = ({params}:DocumentIdProps) => {
             <Cover preview url={document.coverImage}/>
             <div className='md:max-w-3xl lg:max-w-4xl mx-auto'>
                 <Toolbar preview initialData={document}/>
-                <EnhancedEditor
+                <Editor
                     onChange={() => {}}
                     editable={false}
                     initialContent={document.content }
