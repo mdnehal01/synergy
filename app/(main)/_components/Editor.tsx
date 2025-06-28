@@ -24,7 +24,7 @@ interface EditorProps {
 const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     const { edgestore } = useEdgeStore()
 
-    const handleUpload = async (file:File) => {
+    const handleUpload = async (file: File) => {
         const response = await edgestore.publicFiles.upload({
             file
         })
@@ -34,7 +34,7 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     
     const editor: BlockNoteEditor = useCreateBlockNote({
         initialContent: initialContent ? (JSON.parse(initialContent) as PartialBlock[]) : undefined,
-        uploadFile: editable ? handleUpload : undefined // Disable file upload in view mode
+        uploadFile: editable ? handleUpload : undefined // Enable file upload in edit mode
     });
 
     // Update editor editable state when prop changes

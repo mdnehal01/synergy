@@ -1,6 +1,6 @@
 "use client";
 
-import Editor from '@/app/(main)/_components/Editor';
+import EnhancedEditor from '@/app/(main)/_components/enhanced-editor';
 import Toolbar from '@/app/(main)/_components/toolbar';
 import EditModeToggle from '@/app/(main)/_components/edit-mode-toggle';
 import Cover from '@/components/cover';
@@ -58,7 +58,7 @@ const DocumentId = ({params}:DocumentIdProps) => {
             <Cover url={document.coverImage} preview={!isEditMode}/>
             <div className='md:max-w-5xl lg:max-w-6xl mx-auto w-full'>
                 <Toolbar initialData={document} preview={!isEditMode}/>
-                <Editor
+                <EnhancedEditor
                     onChange={onChange}
                     initialContent={document.content}
                     editable={isEditMode}
