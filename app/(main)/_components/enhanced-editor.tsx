@@ -3,7 +3,6 @@
 import {
   BlockNoteEditor,
   PartialBlock,
-  Block
 } from "@blocknote/core";
 
 import "@blocknote/core/fonts/inter.css";
@@ -16,7 +15,7 @@ import "@blocknote/core/style.css";
 import React, { useCallback } from "react";
 import { useEdgeStore } from "@/lib/edgestore";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Upload } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import { useImageUpload } from "@/hooks/use-image-upload";
 import { ImageUploadModal } from "@/components/modals/image-upload-modal";
 
