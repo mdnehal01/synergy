@@ -1,6 +1,6 @@
 "use client";
 import Image from 'next/image';
-import React from 'react'
+import React, { useState } from 'react'
 import EMPTY from "@/public/images/empty.webp"
 import { useUser } from '@clerk/clerk-react';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,16 @@ import { useMutation } from 'convex/react';
 import { api  } from '@/convex/_generated/api';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { WorkspaceModal } from '@/components/modals/workspace-modal';
+import { useWorkspaceModal } from '@/hooks/use-workspace-modal';
+import { FolderPlus } from 'lucide-react';
 
 const DocumentsPage = () => {
     const {user} = useUser(); 
     const create = useMutation(api.documents.create);
     const router = useRouter();
+    const workspaceModal = useWorkspaceModal();
+
     const onCreate = () => {
         const promise = create({ title:"Untitled" })
             .then((documentId) => router.push(`/documents/${documentId}`))
@@ -25,20 +30,42 @@ const DocumentsPage = () => {
     }
 
     return (
-        <div className='h-full flex flex-col items-center justify-center space-y-4'>
-            <Image
-                src={EMPTY}
-                alt='EMPTY'
-                height={300}
-                width={300}
-            />
+        <>
+            <div className='h-full flex flex-col items-center justify-center space-y-4'>
+                <Image
+                    src={EMPTY}
+                    alt='EMPTY'
+                    height={300}
+                    width={300}
+                />
 
-            <h2 className='text-lg font-medium'>Welcome to {user?.firstName}&apos;s synergie.</h2>
-            <Button onClick={onCreate} className='bg-theme-green hover:bg-theme-lightgreen border-2 hover:text-black rounded-sm hover:rounded-full border-theme-green'>
-                <GrAddCircle className='mr-1'/>
-                Create a note 
-            </Button>
-        </div>
+                <h2 className='text-lg font-medium'>Welcome to {user?.firstName}&apos;s synergie.</h2>
+                
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <Button 
+                        onClick={onCreate} 
+                        className='bg-theme-green hover:bg-theme-lightgreen border-2 hover:text-black rounded-sm hover:rounded-full border-theme-green'
+                    >
+                        <GrAddCircle className='mr-1'/>
+                        Create a note 
+                    </Button>
+                    
+                    <Button 
+                        onClick={workspaceModal.onOpen}
+                        variant="outline"
+                        className='border-2 border-theme-green text-theme-green hover:bg-theme-green hover:text-white rounded-sm hover:rounded-full'
+                    >
+                        <FolderPlus className='mr-1 h-4 w-4'/>
+                        Create a workspace
+                    </Button>
+                </div>
+            </div>
+
+            <WorkspaceModal 
+                isOpen={workspaceModal.isOpen}
+                onClose={workspaceModal.onClose}
+            />
+        </>
     )
 }
 
