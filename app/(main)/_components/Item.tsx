@@ -65,6 +65,19 @@ const Item: ItemComponent = ({
     onExpand?.();
   }
 
+  // Enhanced click handler that auto-expands children
+  const handleItemClick = () => {
+    // First, execute the original onclick function (navigation)
+    if (onclick) {
+      onclick();
+    }
+    
+    // Then, if this item has children and is not currently expanded, expand it
+    if (hasChildren && !expanded && onExpand) {
+      onExpand();
+    }
+  };
+
   const ChevronIcon = expanded ? (
     <ChevronDown className="h-4 w-4 shrink-0 text-white group-hover:text-theme-blue transition-colors" />
   ) : (
@@ -165,7 +178,7 @@ const Item: ItemComponent = ({
         isDragging && "opacity-50 scale-105",
         dragOver && "bg-theme-lightgreen/40 border-t-2 border-theme-lightgreen"
       )}
-      onClick={onclick}
+      onClick={handleItemClick}
       draggable={!!id && !isSearch}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
