@@ -161,7 +161,7 @@ const Item: ItemComponent = ({
       className={cn(
         "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
         "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:bg-white",
-        isActive && "bg-theme-lightgreen/30 bg-white text-theme-green",
+        isActive && "bg-white text-theme-green",
         isDragging && "opacity-50 scale-105",
         dragOver && "bg-theme-lightgreen/40 border-t-2 border-theme-lightgreen"
       )}
@@ -179,7 +179,7 @@ const Item: ItemComponent = ({
           className="opacity-0 group-hover:opacity-100 mr-1 cursor-grab active:cursor-grabbing transition-opacity"
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <GripVertical className="h-3 w-3 text-white/50 hover:text-theme-lightgreen transition-colors" />
+          <GripVertical className="h-3 w-3 text-theme-green transition-colors" />
         </div>
       )}
 
@@ -189,7 +189,7 @@ const Item: ItemComponent = ({
           <div
             role="button"
             onClick={handleExpand}
-            className="h-full w-full rounded-sm hover:bg-theme-lightgreen/30 hover:text-theme-blue flex items-center justify-center transition-colors"
+            className="h-full w-full rounded-sm hover:bg-neutral-200 flex items-center justify-center transition-colors"
           >
             {ChevronIcon}
           </div>
