@@ -15,6 +15,7 @@ const config: Config = {
 			theme: {
 				green: 'var(--theme-green, #017149)',
 				blue: 'var(--theme-blue, #001D2D)',
+				yellow: 'var(--theme-yellow, #FFFF00)',
 				lightgreen: 'var(--theme-lightgreen, #06923E)'
 			},
   			card: {
