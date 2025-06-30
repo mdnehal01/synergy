@@ -106,10 +106,39 @@ export const getsidebar = query({
   }
 })
 
+export const getByWorkspace = query({
+  args: {
+    workspaceId: v.id("workspaces")
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    const documents = await ctx.db
+      .query("documents")
+      .withIndex("by_user_workspace", (q) => 
+        q
+          .eq("userId", userId)
+          .eq("workspaceId", args.workspaceId)
+      )
+      .filter((q) => 
+        q.eq(q.field("isArchived"), false)
+      )
+      .collect();
+
+    // Sort by creation time (newest first)
+    return documents.sort((a, b) => b._creationTime - a._creationTime);
+  }
+});
+
 export const create = mutation({
     args: {
         title:v.string(),
-        parentDocument: v.optional(v.id("documents"))
+        parentDocument: v.optional(v.id("documents")),
+        workspaceId: v.optional(v.id("workspaces"))
     },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -140,6 +169,7 @@ export const create = mutation({
         const document = await ctx.db.insert("documents", {
             title: args.title,
             parentDocument: args.parentDocument,
+            workspaceId: args.workspaceId,
             userId,
             isArchived:false,
             isPublished:false,
