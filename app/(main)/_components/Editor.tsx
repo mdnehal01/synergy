@@ -149,13 +149,13 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
   return (
     <div className={editable ? "" : "cursor-default"}>
       {editable && (
-        <div className="mb-4 space-y-2">
-          <div className="flex gap-2">
+        <div className="mb-4 space-y-2 px-14">
+          <div className="flex gap-2 justify-end">
             <Button
               variant="outline"
               size="sm"
               onClick={handleAIGeneration}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white border-none hover:from-blue-600 hover:to-purple-600"
+              className="flex items-center gap-2 bg-gradient-to-r hover:from-neutral-300 from-theme-green hover:to-neutral-400 to-theme-lightgreen text-white border-none"
               disabled={isGenerating || showPromptInput}
             >
               {isGenerating ? (
@@ -187,7 +187,7 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
                 type="submit"
                 size="sm"
                 disabled={!prompt.trim() || isGenerating}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-theme-green hover:bg-theme-lightgreen"
               >
                 {isGenerating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

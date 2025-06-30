@@ -13,7 +13,7 @@ const EditModeToggle: React.FC<EditModeToggleProps> = ({
   onToggle,
 }) => {
   return (
-    <div className={`absolute top-[50px] z-50 left-1/2 right-0 px-32 -translate-x-1/2 w-full ${!isEditMode ? 'bg-yellow-100 dark:bg-neutral-950 shadow': 'bg-transparent shadow-none'} py-2 flex items-center justify-between`}>
+    <div className={`absolute top-[50px] z-50 left-1/2 right-0 px-32 -translate-x-1/2 w-full ${!isEditMode ? 'bg-neutral-200 dark:bg-neutral-950 shadow': 'bg-transparent shadow-none'} py-2 flex items-center justify-between`}>
       {/* Mode Label with Icon */}
       <div className="flex items-center gap-2 text-sm font-medium">
         {isEditMode ? (
