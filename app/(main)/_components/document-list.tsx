@@ -80,6 +80,11 @@ export const DocumentList:React.FC<DocumentListProps> = ({
         )
     }
 
+    // Filter documents based on context
+    const filteredDocuments = workspaceId 
+        ? documents?.filter(doc => !doc.isArchived && !doc.parentDocument) // Only top-level workspace documents
+        : documents;
+
     return (
         <>
             <p 
@@ -92,7 +97,7 @@ export const DocumentList:React.FC<DocumentListProps> = ({
             >
                 No pages inside
             </p>
-            {documents.map((document) => (
+            {filteredDocuments?.map((document) => (
                 <div key={document._id}>
                     <Item
                         id={document._id}
@@ -108,7 +113,7 @@ export const DocumentList:React.FC<DocumentListProps> = ({
                         workspaceId={workspaceId}
                         onReorder={handleReorder}
                     />
-                    {expanded[document._id] && (
+                    {expanded[document._id] && !workspaceId && (
                         <DocumentList
                             parentDocumentId={document._id}
                             level={level+1}

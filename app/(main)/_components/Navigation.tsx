@@ -17,6 +17,7 @@ import TrashBox from './trash-box';
 import { useSearch } from '@/hooks/use-search';
 import Navbar from './navbar';
 import SettingsModal from './settings-modal';
+import { Id } from '@/convex/_generated/dataModel';
 
 const Navigation = ()  => {
     const pathname = usePathname();
@@ -26,12 +27,14 @@ const Navigation = ()  => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const documents = (api.documents.getsidebar);
     const create = useMutation(api.documents.create) 
+    const moveDocument = useMutation(api.documents.moveDocument)
 
     const isResizingRef = useRef(false);
     const sidebarRef = useRef<ElementRef<"aside">>(null);
     const navbarRef = useRef<ElementRef<"div">>(null);
     const [isResetting, setIsResseting] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(isMobile); 
+    const [dragOver, setDragOver] = useState(false)
     const params = useParams();
     const search = useSearch()
     const [showSettings, setShowSettings] = useState(false);
@@ -123,17 +126,87 @@ const Navigation = ()  => {
             error: "Failed to create a new note."
         })
     }
+
+    // Handle drag and drop from workspace to main sidebar
+    const handleMainSidebarDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = "move"
+        setDragOver(true)
+    }
+
+    const handleMainSidebarDragLeave = (e: React.DragEvent) => {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+        const x = e.clientX
+        const y = e.clientY
+        
+        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+            setDragOver(false)
+        }
+    }
+
+    const handleMainSidebarDrop = async (e: React.DragEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setDragOver(false)
+        
+        const draggedId = e.dataTransfer.getData("text/plain") as Id<"documents">
+        if (!draggedId) return
+
+        try {
+            let dragData
+            try {
+                dragData = JSON.parse(e.dataTransfer.getData("application/json"))
+            } catch {
+                dragData = { documentId: draggedId }
+            }
+
+            // Move document to main documents (remove from workspace)
+            const promise = moveDocument({
+                id: draggedId,
+                targetParentId: undefined, // Make it top-level
+                targetWorkspaceId: undefined // Remove from workspace
+            })
+            
+            toast.promise(promise, {
+                loading: "Moving document to main documents...",
+                success: "Document moved to main documents successfully!",
+                error: "Failed to move document to main documents"
+            })
+        } catch (error) {
+            console.error("Main sidebar drop operation failed:", error)
+            toast.error("Failed to move document to main documents")
+        }
+    }
+
     return (
         <>
-            <aside ref={sidebarRef } className={cn('group/sidebar h-full bg-theme-green overflow-y-auto relative flex w-60 flex-col z-[99999] text-white',
-                isResetting && "transition-all duration-300 ease-in-out",
-                isMobile && "w-0"
-            )}>
+            <aside 
+                ref={sidebarRef} 
+                className={cn(
+                    'group/sidebar h-full bg-theme-green overflow-y-auto relative flex w-60 flex-col z-[99999] text-white',
+                    isResetting && "transition-all duration-300 ease-in-out",
+                    isMobile && "w-0",
+                    dragOver && "bg-theme-lightgreen/20 border-r-4 border-theme-lightgreen"
+                )}
+                onDragOver={handleMainSidebarDragOver}
+                onDragLeave={handleMainSidebarDragLeave}
+                onDrop={handleMainSidebarDrop}
+            >
                 <div onClick={collapse } role='button' className={cn('group/boox text-muted-foreground h-6 w-6 rounded-sm hover:bg-theme-lightgreen/20 hover:text-theme-lightgreen absolute top-3 right-2 opacity-0 group-hover/sidebar:opacity-100 transition-all',
                 isMobile && "opacity-100"
                 )}>
                     <ChevronsLeft className='h-6 w-6 text-white group-hover/boox:text-theme-lightgreen transition-colors'/>
                 </div>
+
+                {/* Drop indicator */}
+                {dragOver && (
+                    <div className="absolute inset-0 bg-theme-lightgreen/10 border-2 border-dashed border-theme-lightgreen flex items-center justify-center z-50">
+                        <div className="bg-theme-green text-white px-4 py-2 rounded-lg shadow-lg">
+                            <p className="text-sm font-medium">Drop to move to main documents</p>
+                        </div>
+                    </div>
+                )}
+
                 <div>
                     <UserItem/>
                     
