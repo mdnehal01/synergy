@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
 import Loader from "@/components/Loader"
 import WorkspaceNavigation from "./_components/workspace-navigation"
+import { SearchCommand } from "@/components/search-command"
 
 interface WorkspaceLayoutProps {
     children: React.ReactNode
@@ -39,9 +40,10 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
     }
 
     return (
-        <div className="h-full flex">
+        <div className="h-full flex dark:bg-neutral-900">
             <WorkspaceNavigation workspace={workspace} />
             <main className="flex-1 h-full overflow-y-auto">
+                <SearchCommand/>
                 {children}
             </main>
         </div>

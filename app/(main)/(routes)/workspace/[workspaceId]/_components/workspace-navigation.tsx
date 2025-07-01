@@ -8,25 +8,22 @@ import { api } from "@/convex/_generated/api"
 import { Doc, Id } from "@/convex/_generated/dataModel"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { 
     ChevronsLeft, 
     FileText, 
-    Plus, 
     Search, 
     Settings,
-    ArrowLeft,
-    FolderOpen
+    ArrowLeft
 } from "lucide-react"
 import { toast } from "sonner"
 import { GrAdd, GrAddCircle } from 'react-icons/gr'
 import { BiTrash } from 'react-icons/bi'
 import Item from "@/app/(main)/_components/Item"
-import { DocumentList } from "@/app/(main)/_components/document-list"
 import TrashBox from "@/app/(main)/_components/trash-box"
 import { useSearch } from "@/hooks/use-search"
 import UserItem from "@/app/(main)/_components/UserItem"
+import WorkspaceNavbar from "./workspace-navbar"
 
 interface WorkspaceNavigationProps {
     workspace: Doc<"workspaces">
@@ -266,6 +263,7 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                                     documentIcon={document.icon}
                                     isActive={params.documentId === document._id}
                                     level={0}
+                                    workspaceId={workspace._id}
                                     onReorder={handleReorder}
                                 />
                             ))}
@@ -315,7 +313,10 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                 )} 
                 ref={navbarRef}
             >
-                {/* You can add a navbar here if needed */}
+                <WorkspaceNavbar 
+                    isCollapsed={isCollapsed}
+                    onResetWidth={resetWidth}
+                />
             </div>
         </>
     )
