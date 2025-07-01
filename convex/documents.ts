@@ -528,3 +528,125 @@ export const removeCover = mutation({
     return document;
   }
 })
+
+export const duplicate = mutation({
+  args: {
+    id: v.id("documents"),
+    targetParentId: v.optional(v.id("documents")),
+    targetWorkspaceId: v.optional(v.id("workspaces"))
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    const sourceDoc = await ctx.db.get(args.id);
+    if (!sourceDoc) {
+      throw new Error("Source document not found");
+    }
+
+    if (sourceDoc.userId !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    // Get the highest order number for siblings in target location
+    const siblings = await ctx.db
+      .query("documents")
+      .withIndex("by_user_parent", (q) => 
+        q
+          .eq("userId", userId)
+          .eq("parentDocument", args.targetParentId)
+      )
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("isArchived"), false),
+          args.targetWorkspaceId 
+            ? q.eq(q.field("workspaceId"), args.targetWorkspaceId)
+            : q.eq(q.field("workspaceId"), undefined)
+        )
+      )
+      .collect();
+
+    const maxOrder = siblings.reduce((max, doc) => 
+      Math.max(max, doc.order || 0), 0
+    );
+
+    // Create duplicate
+    const duplicateDoc = await ctx.db.insert("documents", {
+      title: `${sourceDoc.title} (Copy)`,
+      content: sourceDoc.content,
+      icon: sourceDoc.icon,
+      coverImage: sourceDoc.coverImage,
+      parentDocument: args.targetParentId,
+      workspaceId: args.targetWorkspaceId,
+      userId,
+      isArchived: false,
+      isPublished: false,
+      order: maxOrder + 1
+    });
+
+    return duplicateDoc;
+  }
+});
+
+export const moveDocument = mutation({
+  args: {
+    id: v.id("documents"),
+    targetParentId: v.optional(v.id("documents")),
+    targetWorkspaceId: v.optional(v.id("workspaces"))
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    const document = await ctx.db.get(args.id);
+    if (!document) {
+      throw new Error("Document not found");
+    }
+
+    if (document.userId !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    // Can't move document to be a child of itself
+    if (args.targetParentId === args.id) {
+      throw new Error("Cannot move document to be a child of itself");
+    }
+
+    // Get the highest order number for siblings in target location
+    const siblings = await ctx.db
+      .query("documents")
+      .withIndex("by_user_parent", (q) => 
+        q
+          .eq("userId", userId)
+          .eq("parentDocument", args.targetParentId)
+      )
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("isArchived"), false),
+          args.targetWorkspaceId 
+            ? q.eq(q.field("workspaceId"), args.targetWorkspaceId)
+            : q.eq(q.field("workspaceId"), undefined)
+        )
+      )
+      .collect();
+
+    const maxOrder = siblings.reduce((max, doc) => 
+      Math.max(max, doc.order || 0), 0
+    );
+
+    // Update document location
+    const updatedDoc = await ctx.db.patch(args.id, {
+      parentDocument: args.targetParentId,
+      workspaceId: args.targetWorkspaceId,
+      order: maxOrder + 1
+    });
+
+    return updatedDoc;
+  }
+});

@@ -13,12 +13,14 @@ import { toast } from "sonner";
 interface DocumentListProps{
     parentDocumentId?:Id<"documents">;
     level?:number;
-    data?:Doc<"documents">
+    data?:Doc<"documents">;
+    workspaceId?: Id<"workspaces">;
 }
 
 export const DocumentList:React.FC<DocumentListProps> = ({
     parentDocumentId,
-    level=0
+    level=0,
+    workspaceId
 }) => {
     const params = useParams();
     const router = useRouter();
@@ -33,12 +35,17 @@ export const DocumentList:React.FC<DocumentListProps> = ({
         }))
     };
 
-    const documents = useQuery(api.documents.getsidebar, {
-        parentDocument: parentDocumentId
-    });
+    // Use different queries based on context
+    const documents = workspaceId 
+        ? useQuery(api.documents.getByWorkspace, { workspaceId })
+        : useQuery(api.documents.getsidebar, { parentDocument: parentDocumentId });
 
     const onRedirect = (documentId:string) => {
-        router.push(`/documents/${documentId}`);
+        if (workspaceId) {
+            router.push(`/workspace/${workspaceId}/document/${documentId}`);
+        } else {
+            router.push(`/documents/${documentId}`);
+        }
     };
 
     const handleReorder = async (
@@ -98,12 +105,14 @@ export const DocumentList:React.FC<DocumentListProps> = ({
                         onExpand={()=>onExpand(document._id)}
                         expanded={expanded[document._id]}
                         parentDocument={parentDocumentId}
+                        workspaceId={workspaceId}
                         onReorder={handleReorder}
                     />
                     {expanded[document._id] && (
                         <DocumentList
                             parentDocumentId={document._id}
                             level={level+1}
+                            workspaceId={workspaceId}
                         />
                     )}
                 </div>
