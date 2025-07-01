@@ -61,6 +61,7 @@ const Item: ItemComponent = ({
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [dragPosition, setDragPosition] = useState<'before' | 'after' | 'child'>('before');
   const [showRenameModal, setShowRenameModal] = useState(false);
 
   // Query to check if this document has children
@@ -230,11 +231,16 @@ const Item: ItemComponent = ({
     }
   }
 
-  // Drag and Drop handlers
+  // Enhanced Drag and Drop handlers
   const handleDragStart = (e: React.DragEvent) => {
     if (!id || isSearch) return;
     setIsDragging(true);
     e.dataTransfer.setData("text/plain", id);
+    e.dataTransfer.setData("application/json", JSON.stringify({
+      documentId: id,
+      workspaceId: workspaceId,
+      parentDocument: parentDocument
+    }));
     e.dataTransfer.effectAllowed = "move";
   };
 
@@ -247,6 +253,20 @@ const Item: ItemComponent = ({
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     setDragOver(true);
+
+    // Calculate drop position based on mouse position
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const height = rect.height;
+    
+    // Divide the item into three zones
+    if (y < height * 0.25) {
+      setDragPosition('before');
+    } else if (y > height * 0.75) {
+      setDragPosition('after');
+    } else {
+      setDragPosition('child');
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
@@ -257,38 +277,112 @@ const Item: ItemComponent = ({
     
     if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setDragOver(false);
+      setDragPosition('before');
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragOver(false);
     
-    if (!id || isSearch || !onReorder) return;
+    if (!id || isSearch) return;
     
     const draggedId = e.dataTransfer.getData("text/plain") as Id<"documents">;
     if (draggedId === id) return;
 
-    // Determine if we should place before or after based on drop position
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const midpoint = rect.top + rect.height / 2;
-    const position = e.clientY < midpoint ? "before" : "after";
+    try {
+      let dragData;
+      try {
+        dragData = JSON.parse(e.dataTransfer.getData("application/json"));
+      } catch {
+        // Fallback for simple drag operations
+        dragData = { documentId: draggedId };
+      }
 
-    onReorder(draggedId, id, position);
+      if (dragPosition === 'child') {
+        // Make the dragged document a child of this document
+        const promise = moveDocument({
+          id: draggedId,
+          targetParentId: id,
+          targetWorkspaceId: workspaceId
+        });
+        
+        toast.promise(promise, {
+          loading: "Moving document as child...",
+          success: "Document moved as child successfully!",
+          error: "Failed to move document as child"
+        });
+
+        // Auto-expand to show the new child
+        if (!expanded && onExpand) {
+          onExpand();
+        }
+      } else if (dragPosition === 'before' || dragPosition === 'after') {
+        // Handle sibling reordering
+        if (onReorder) {
+          onReorder(draggedId, id, dragPosition);
+        } else {
+          // Fallback: move to same parent level
+          const promise = moveDocument({
+            id: draggedId,
+            targetParentId: parentDocument,
+            targetWorkspaceId: workspaceId
+          });
+          
+          toast.promise(promise, {
+            loading: "Reordering document...",
+            success: "Document reordered successfully!",
+            error: "Failed to reorder document"
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Drop operation failed:", error);
+      toast.error("Failed to move document");
+    } finally {
+      setDragPosition('before');
+    }
+  };
+
+  // Get drag indicator styles
+  const getDragIndicatorStyles = () => {
+    if (!dragOver) return {};
+    
+    switch (dragPosition) {
+      case 'before':
+        return {
+          borderTop: '2px solid #01FF5A',
+          backgroundColor: 'rgba(1, 255, 90, 0.1)'
+        };
+      case 'after':
+        return {
+          borderBottom: '2px solid #01FF5A',
+          backgroundColor: 'rgba(1, 255, 90, 0.1)'
+        };
+      case 'child':
+        return {
+          backgroundColor: 'rgba(1, 255, 90, 0.2)',
+          border: '2px dashed #01FF5A'
+        };
+      default:
+        return {};
+    }
   };
 
   return (
     <>
       <div
         role="button"
-        style={{ paddingLeft: level ? `${(level * 12) + 12}px` : "12px" }}
+        style={{ 
+          paddingLeft: level ? `${(level * 12) + 12}px` : "12px",
+          ...getDragIndicatorStyles()
+        }}
         className={cn(
           "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
           "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:bg-white",
           isActive && "bg-white text-theme-green",
-          isDragging && "opacity-50 scale-105",
-          dragOver && "bg-theme-lightgreen/40 border-t-2 border-theme-lightgreen"
+          isDragging && "opacity-50 scale-105"
         )}
         onClick={handleItemClick}
         draggable={!!id && !isSearch}
@@ -325,6 +419,14 @@ const Item: ItemComponent = ({
           {documentIcon || icon}
         </div>
         <span className="truncate group-hover:text-theme-green transition-colors">{label}</span>
+
+        {/* Drop position indicator */}
+        {dragOver && (
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs bg-theme-green text-white px-2 py-1 rounded z-10">
+            {dragPosition === 'child' ? 'Drop as child' : 
+             dragPosition === 'before' ? 'Drop before' : 'Drop after'}
+          </div>
+        )}
 
         {isSearch && (
           <kbd className="ml-auto pointer-events-none flex h-5 select-none items-center gap-1 rounded border bg-theme-lightgreen px-1.5 font-mono text-[10px] font-medium text-black opacity-100 group-hover:bg-theme-green group-hover:text-white transition-colors">
