@@ -650,3 +650,60 @@ export const moveDocument = mutation({
     return updatedDoc;
   }
 });
+
+export const makeParent = mutation({
+  args: {
+    id: v.id("documents")
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    const document = await ctx.db.get(args.id);
+    if (!document) {
+      throw new Error("Document not found");
+    }
+
+    if (document.userId !== userId) {
+      throw new Error("Unauthorized");
+    }
+
+    // Check if document is already a parent (has no parent)
+    if (!document.parentDocument) {
+      throw new Error("Document is already a parent");
+    }
+
+    // Get the highest order number for top-level documents in the same context
+    const topLevelSiblings = await ctx.db
+      .query("documents")
+      .withIndex("by_user_parent", (q) => 
+        q
+          .eq("userId", userId)
+          .eq("parentDocument", undefined)
+      )
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("isArchived"), false),
+          document.workspaceId 
+            ? q.eq(q.field("workspaceId"), document.workspaceId)
+            : q.eq(q.field("workspaceId"), undefined)
+        )
+      )
+      .collect();
+
+    const maxOrder = topLevelSiblings.reduce((max, doc) => 
+      Math.max(max, doc.order || 0), 0
+    );
+
+    // Update document to be a parent (remove parentDocument)
+    const updatedDoc = await ctx.db.patch(args.id, {
+      parentDocument: undefined,
+      order: maxOrder + 1
+    });
+
+    return updatedDoc;
+  }
+});

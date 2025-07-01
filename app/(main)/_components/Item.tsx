@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronDown, ChevronRight, CommandIcon, GripVertical, Edit3, Copy, Scissors, ClipboardPaste, FileText } from "lucide-react";
+import { ChevronDown, ChevronRight, CommandIcon, GripVertical, Edit3, Copy, Scissors, ClipboardPaste, FileText, MoveUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { BiDotsHorizontal, BiPlus, BiTrash } from "react-icons/bi";
@@ -55,6 +55,7 @@ const Item: ItemComponent = ({
   const archive = useMutation(api.documents.archive);
   const duplicate = useMutation(api.documents.duplicate);
   const moveDocument = useMutation(api.documents.moveDocument);
+  const makeParent = useMutation(api.documents.makeParent);
   const { user } = useUser();
   const clipboard = useClipboard();
 
@@ -68,6 +69,7 @@ const Item: ItemComponent = ({
   });
 
   const hasChildren = childDocuments && childDocuments.length > 0;
+  const isChild = !!parentDocument; // Document is a child if it has a parent
 
   const handleExpand = (event: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
     event.stopPropagation();
@@ -210,6 +212,24 @@ const Item: ItemComponent = ({
     }
   }
 
+  const onMakeParent = async (event: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
+    event.stopPropagation();
+    if (!id) return;
+
+    try {
+      const promise = makeParent({ id });
+      
+      toast.promise(promise, {
+        loading: "Making document a parent...",
+        success: "Document moved to top level successfully!",
+        error: "Failed to make document a parent"
+      });
+    } catch (error) {
+      console.error("Make parent operation failed:", error);
+      toast.error("Failed to make document a parent");
+    }
+  }
+
   // Drag and Drop handlers
   const handleDragStart = (e: React.DragEvent) => {
     if (!id || isSearch) return;
@@ -346,6 +366,14 @@ const Item: ItemComponent = ({
                   <FileText className="mr-2 h-4 w-4"/>
                   Add child page
                 </DropdownMenuItem>
+                
+                {/* Show "Make as parent" option only for child documents */}
+                {isChild && (
+                  <DropdownMenuItem onClick={onMakeParent} className="hover:bg-theme-lightgreen/10 hover:text-theme-green transition-colors">
+                    <MoveUp className="mr-2 h-4 w-4"/>
+                    Make as parent
+                  </DropdownMenuItem>
+                )}
                 
                 <DropdownMenuSeparator/>
                 
