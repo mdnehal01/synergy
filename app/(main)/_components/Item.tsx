@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronDown, ChevronRight, CommandIcon, GripVertical, Edit3, Copy, Scissors, ClipboardPaste, FileText, MoveUp } from "lucide-react";
+import { ChevronDown, ChevronRight, CommandIcon, GripVertical, Edit3, Copy, Scissors, ClipboardPaste, FileText, MoveUp, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { BiDotsHorizontal, BiPlus, BiTrash } from "react-icons/bi";
@@ -210,6 +210,46 @@ const Item: ItemComponent = ({
     } catch (error) {
       console.error("Paste operation failed:", error);
       toast.error("Failed to paste document");
+    }
+  }
+
+  const onPasteAsParent = async (event: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
+    event.stopPropagation();
+    if (!clipboard.item || !clipboard.canPasteAsParent(id, parentDocument, workspaceId)) return;
+
+    try {
+      if (clipboard.item.operation === 'copy') {
+        // Duplicate the document as a sibling (same parent as current document)
+        const promise = duplicate({
+          id: clipboard.item.documentId,
+          targetParentId: parentDocument, // Same parent as current document
+          targetWorkspaceId: workspaceId
+        });
+        
+        toast.promise(promise, {
+          loading: "Duplicating document as sibling...",
+          success: "Document duplicated as sibling successfully!",
+          error: "Failed to duplicate document as sibling"
+        });
+      } else if (clipboard.item.operation === 'cut') {
+        // Move the document as a sibling (same parent as current document)
+        const promise = moveDocument({
+          id: clipboard.item.documentId,
+          targetParentId: parentDocument, // Same parent as current document
+          targetWorkspaceId: workspaceId
+        });
+        
+        toast.promise(promise, {
+          loading: "Moving document as sibling...",
+          success: "Document moved as sibling successfully!",
+          error: "Failed to move document as sibling"
+        });
+        
+        clipboard.clearItem(); // Clear clipboard after cut operation
+      }
+    } catch (error) {
+      console.error("Paste as parent operation failed:", error);
+      toast.error("Failed to paste document as sibling");
     }
   }
 
@@ -493,6 +533,13 @@ const Item: ItemComponent = ({
                   <DropdownMenuItem onClick={onPaste} className="hover:bg-theme-lightgreen/10 hover:text-theme-green transition-colors">
                     <ClipboardPaste className="mr-2 h-4 w-4"/>
                     Paste as child ({clipboard.item?.operation === 'copy' ? 'Copy' : 'Move'})
+                  </DropdownMenuItem>
+                )}
+
+                {clipboard.canPasteAsParent(id, parentDocument, workspaceId) && (
+                  <DropdownMenuItem onClick={onPasteAsParent} className="hover:bg-theme-lightgreen/10 hover:text-theme-green transition-colors">
+                    <Users className="mr-2 h-4 w-4"/>
+                    Paste as sibling ({clipboard.item?.operation === 'copy' ? 'Copy' : 'Move'})
                   </DropdownMenuItem>
                 )}
                 

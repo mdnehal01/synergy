@@ -19,6 +19,7 @@ interface ClipboardStore {
   clearItem: () => void
   hasItem: () => boolean
   canPaste: (targetParentId?: Id<"documents">, targetWorkspaceId?: Id<"workspaces">) => boolean
+  canPasteAsParent: (currentDocumentId?: Id<"documents">, currentParentId?: Id<"documents">, workspaceId?: Id<"workspaces">) => boolean
 }
 
 export const useClipboard = create<ClipboardStore>((set, get) => ({
@@ -35,5 +36,18 @@ export const useClipboard = create<ClipboardStore>((set, get) => ({
     
     // Must be in the same workspace context
     return item.workspaceId === targetWorkspaceId
+  },
+  canPasteAsParent: (currentDocumentId?: Id<"documents">, currentParentId?: Id<"documents">, workspaceId?: Id<"workspaces">) => {
+    const { item } = get()
+    if (!item) return false
+    
+    // Can't paste itself
+    if (item.documentId === currentDocumentId) return false
+    
+    // Can't paste as parent if the source is the current parent
+    if (item.documentId === currentParentId) return false
+    
+    // Must be in the same workspace context
+    return item.workspaceId === workspaceId
   }
 }))
