@@ -5,7 +5,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { ElementRef, MouseEvent, useEffect, useRef, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts';
 import UserItem from './UserItem';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { GrAdd, GrAddCircle } from 'react-icons/gr';
 import Item from './Item';
@@ -17,6 +17,9 @@ import TrashBox from './trash-box';
 import { useSearch } from '@/hooks/use-search';
 import Navbar from './navbar';
 import SettingsModal from './settings-modal';
+import { FolderPlus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { formatDistanceToNow } from 'date-fns';
 
 const Navigation = ()  => {
     const pathname = usePathname();
@@ -35,7 +38,10 @@ const Navigation = ()  => {
     const params = useParams();
     const search = useSearch()
     const [showSettings, setShowSettings] = useState(false);
+    const [showAllWorkspaces, setShowAllWorkspaces] = useState(false);
 
+    // Fetch workspaces for sidebar
+    const workspaces = useQuery(api.workspaces.getAll);
     
     useEffect(() => {
         if(isMobile){
@@ -123,6 +129,18 @@ const Navigation = ()  => {
             error: "Failed to create a new note."
         })
     }
+
+    const onWorkspaceClick = (workspaceId: string) => {
+        router.push(`/workspace/${workspaceId}`);
+    }
+
+    // Determine which workspaces to show
+    const displayedWorkspaces = workspaces ? (
+        showAllWorkspaces ? workspaces : workspaces.slice(0, 3)
+    ) : [];
+
+    const hasMoreWorkspaces = workspaces && workspaces.length > 3;
+
     return (
         <>
             <aside ref={sidebarRef } className={cn('group/sidebar h-full bg-theme-green overflow-y-auto relative flex w-60 flex-col z-[99999] text-white',
@@ -156,6 +174,87 @@ const Navigation = ()  => {
                         icon={<GrAddCircle className='shrink-0 h-[18px] mr-2'/>}
                     />
                 </div>
+
+                {/* Workspaces Section */}
+                {workspaces && workspaces.length > 0 && (
+                    <div className='mt-4 border-t border-theme-lightgreen/20 pt-4'>
+                        <div className="px-3 mb-2">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-medium text-white/80 flex items-center gap-2">
+                                    <FolderPlus className="h-4 w-4" />
+                                    Workspaces
+                                    <span className="text-xs">({workspaces.length})</span>
+                                </h3>
+                                
+                                {hasMoreWorkspaces && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setShowAllWorkspaces(!showAllWorkspaces)}
+                                        className="text-white/60 hover:text-white hover:bg-theme-lightgreen/20 h-6 w-6 p-0"
+                                    >
+                                        {showAllWorkspaces ? (
+                                            <ChevronUp className="h-3 w-3" />
+                                        ) : (
+                                            <ChevronDown className="h-3 w-3" />
+                                        )}
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-1">
+                            {displayedWorkspaces.map((workspace) => (
+                                <div
+                                    key={workspace._id}
+                                    role="button"
+                                    onClick={() => onWorkspaceClick(workspace._id)}
+                                    className={cn(
+                                        "group min-h-[27px] py-1 pr-3 pl-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
+                                        "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:bg-white cursor-pointer"
+                                    )}
+                                >
+                                    <div className="mr-2 flex items-center justify-center shrink-0 group-hover:text-theme-green transition-colors">
+                                        <span className="text-sm">{workspace.icon || '📁'}</span>
+                                    </div>
+                                    
+                                    <div className="flex-1 min-w-0">
+                                        <div className="truncate group-hover:text-theme-green transition-colors">
+                                            {workspace.name}
+                                        </div>
+                                        <div className="text-xs text-white/60 group-hover:text-theme-green/70 transition-colors">
+                                            {formatDistanceToNow(new Date(workspace.createdAt), { addSuffix: true })}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Show more/less button */}
+                        {hasMoreWorkspaces && (
+                            <div className="px-3 mt-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setShowAllWorkspaces(!showAllWorkspaces)}
+                                    className="w-full text-white/80 hover:text-white hover:bg-theme-lightgreen/20 text-xs h-7"
+                                >
+                                    {showAllWorkspaces ? (
+                                        <>
+                                            <ChevronUp className="h-3 w-3 mr-1" />
+                                            Show less
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ChevronDown className="h-3 w-3 mr-1" />
+                                            Show {workspaces.length - 3} more
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <div className='mt-4'>
                     <DocumentList/>
