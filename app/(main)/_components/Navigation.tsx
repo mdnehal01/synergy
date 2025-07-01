@@ -5,7 +5,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { ElementRef, MouseEvent, useEffect, useRef, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts';
 import UserItem from './UserItem';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { GrAdd, GrAddCircle } from 'react-icons/gr';
 import Item from './Item';
@@ -17,6 +17,9 @@ import TrashBox from './trash-box';
 import { useSearch } from '@/hooks/use-search';
 import Navbar from './navbar';
 import SettingsModal from './settings-modal';
+import { Button } from '@/components/ui/button';
+import { FolderPlus, ChevronDown, ChevronUp, Folder } from 'lucide-react';
+import { useWorkspaceModal } from '@/hooks/use-workspace-modal';
 
 const Navigation = ()  => {
     const pathname = usePathname();
@@ -26,12 +29,15 @@ const Navigation = ()  => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const documents = (api.documents.getsidebar);
     const create = useMutation(api.documents.create) 
+    const workspaces = useQuery(api.workspaces.getAll);
+    const workspaceModal = useWorkspaceModal();
 
     const isResizingRef = useRef(false);
     const sidebarRef = useRef<ElementRef<"aside">>(null);
     const navbarRef = useRef<ElementRef<"div">>(null);
     const [isResetting, setIsResseting] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(isMobile); 
+    const [showAllWorkspaces, setShowAllWorkspaces] = useState(false);
     const params = useParams();
     const search = useSearch()
     const [showSettings, setShowSettings] = useState(false);
@@ -123,6 +129,18 @@ const Navigation = ()  => {
             error: "Failed to create a new note."
         })
     }
+
+    const onWorkspaceClick = (workspaceId: string) => {
+        router.push(`/workspace/${workspaceId}`);
+    }
+
+    // Determine which workspaces to show
+    const displayedWorkspaces = workspaces ? (
+        showAllWorkspaces ? workspaces : workspaces.slice(0, 3)
+    ) : [];
+
+    const hasMoreWorkspaces = workspaces && workspaces.length > 3;
+
     return (
         <>
             <aside ref={sidebarRef } className={cn('group/sidebar h-full bg-theme-green overflow-y-auto relative flex w-60 flex-col z-[99999] text-white',
@@ -157,7 +175,98 @@ const Navigation = ()  => {
                     />
                 </div>
 
-                <div className='mt-4'>
+                {/* Workspaces Section */}
+                <div className='mt-4 border-t border-theme-lightgreen/20 pt-4'>
+                    <div className="px-3 mb-2">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-medium text-white/80 flex items-center gap-2">
+                                <FolderPlus className="h-4 w-4" />
+                                Workspaces
+                                {workspaces && workspaces.length > 0 && (
+                                    <span className="text-xs text-white/60">({workspaces.length})</span>
+                                )}
+                            </h3>
+                            
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={workspaceModal.onOpen}
+                                className="opacity-0 group-hover/sidebar:opacity-100 text-white hover:bg-theme-lightgreen/20 hover:text-theme-lightgreen p-1 h-auto transition-all"
+                            >
+                                <GrAdd className="h-3 w-3" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    {workspaces === undefined ? (
+                        // Loading state
+                        <div className="space-y-1 px-3">
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className="h-6 bg-theme-lightgreen/20 rounded animate-pulse" />
+                            ))}
+                        </div>
+                    ) : workspaces?.length === 0 ? (
+                        // Empty state
+                        <div className="text-center py-4 px-3">
+                            <Folder className="h-6 w-6 text-white/40 mx-auto mb-2" />
+                            <p className="text-xs text-white/60 mb-2">
+                                No workspaces yet
+                            </p>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={workspaceModal.onOpen}
+                                className="text-white/80 hover:text-white hover:bg-theme-lightgreen/20 text-xs"
+                            >
+                                Create workspace
+                            </Button>
+                        </div>
+                    ) : (
+                        // Workspaces list
+                        <div className="space-y-1">
+                            {displayedWorkspaces.map((workspace) => (
+                                <Item
+                                    key={workspace._id}
+                                    onclick={() => onWorkspaceClick(workspace._id)}
+                                    label={workspace.name}
+                                    icon={<span className="text-sm mr-2">{workspace.icon || '📁'}</span>}
+                                    level={0}
+                                />
+                            ))}
+                            
+                            {/* Show more/less button */}
+                            {hasMoreWorkspaces && (
+                                <div className="px-3 pt-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setShowAllWorkspaces(!showAllWorkspaces)}
+                                        className="w-full justify-start text-white/80 hover:text-white hover:bg-theme-lightgreen/20 text-xs h-6"
+                                    >
+                                        {showAllWorkspaces ? (
+                                            <>
+                                                <ChevronUp className="h-3 w-3 mr-2" />
+                                                Show less
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ChevronDown className="h-3 w-3 mr-2" />
+                                                Show {workspaces.length - 3} more
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Documents Section */}
+                <div className='mt-4 border-t border-theme-lightgreen/20 pt-4'>
+                    <div className="px-3 mb-2">
+                        <h3 className="text-sm font-medium text-white/80">Documents</h3>
+                    </div>
+                    
                     <DocumentList/>
                     <Item onclick={handleCreate} 
                         icon={<GrAdd  className='h-[18px] mr-2'/>}
