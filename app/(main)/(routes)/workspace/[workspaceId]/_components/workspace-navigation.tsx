@@ -162,8 +162,7 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                     isResetting && "transition-all duration-300 ease-in-out",
                     isMobile && "w-0"
                 )}
-            >
-                <div 
+            >                <div 
                     onClick={collapse} 
                     role='button' 
                     className={cn(
