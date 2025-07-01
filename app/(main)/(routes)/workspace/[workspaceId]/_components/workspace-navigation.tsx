@@ -162,7 +162,8 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                     isResetting && "transition-all duration-300 ease-in-out",
                     isMobile && "w-0"
                 )}
-            >                <div 
+            >
+                <div 
                     onClick={collapse} 
                     role='button' 
                     className={cn(
@@ -174,7 +175,9 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                 </div>
 
                 <div>
-                    <UserItem/>
+                    {/* <UserItem/> */}
+
+                  <h1>HHHHHDASKJB</h1>
                     
                     {/* Workspace Header */}
                     <div className="px-3 py-2 border-b border-theme-lightgreen/20">
