@@ -1,6 +1,6 @@
 "use client";
 import Image from 'next/image';
-import React from 'react'
+import React, { useState } from 'react'
 import EMPTY from "@/public/images/empty.webp"
 import { useUser } from '@clerk/clerk-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { WorkspaceModal } from '@/components/modals/workspace-modal';
 import { useWorkspaceModal } from '@/hooks/use-workspace-modal';
-import { FolderPlus, FileText, Calendar, MoreHorizontal } from 'lucide-react';
+import { FolderPlus, FileText, Calendar, MoreHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { formatDistanceToNow } from 'date-fns';
@@ -22,6 +22,7 @@ const DocumentsPage = () => {
     const archiveWorkspace = useMutation(api.workspaces.archive);
     const router = useRouter();
     const workspaceModal = useWorkspaceModal();
+    const [showAllWorkspaces, setShowAllWorkspaces] = useState(false);
     
     // Fetch workspaces
     const workspaces = useQuery(api.workspaces.getAll);
@@ -46,9 +47,15 @@ const DocumentsPage = () => {
     }
 
     const onWorkspaceClick = (workspaceId: string) => {
-        // Navigate to workspace view (implement this route later)
         router.push(`/workspace/${workspaceId}`);
     }
+
+    // Determine which workspaces to show
+    const displayedWorkspaces = workspaces ? (
+        showAllWorkspaces ? workspaces : workspaces.slice(0, 3)
+    ) : [];
+
+    const hasMoreWorkspaces = workspaces && workspaces.length > 3;
 
     return (
         <>
@@ -89,19 +96,28 @@ const DocumentsPage = () => {
                 {/* Workspaces Section */}
                 {workspaces === undefined ? (
                     // Loading state
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[...Array(3)].map((_, i) => (
-                            <Card key={i} className="animate-pulse">
-                                <CardHeader>
-                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-                                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                                </CardContent>
-                            </Card>
-                        ))}
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-semibold flex items-center gap-2">
+                                <FolderPlus className="h-5 w-5 text-theme-green" />
+                                Your Workspaces
+                            </h2>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[...Array(3)].map((_, i) => (
+                                <Card key={i} className="animate-pulse">
+                                    <CardHeader>
+                                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
                     </div>
                 ) : workspaces.length === 0 ? (
                     // Empty state
@@ -120,13 +136,39 @@ const DocumentsPage = () => {
                 ) : (
                     // Workspaces grid
                     <div>
-                        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                            <FolderPlus className="h-5 w-5 text-theme-green" />
-                            Your Workspaces
-                        </h2>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-semibold flex items-center gap-2">
+                                <FolderPlus className="h-5 w-5 text-theme-green" />
+                                Your Workspaces
+                                <span className="text-sm font-normal text-muted-foreground ml-2">
+                                    ({workspaces.length} total)
+                                </span>
+                            </h2>
+                            
+                            {hasMoreWorkspaces && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setShowAllWorkspaces(!showAllWorkspaces)}
+                                    className="text-theme-green hover:bg-theme-lightgreen/10 hover:text-theme-green"
+                                >
+                                    {showAllWorkspaces ? (
+                                        <>
+                                            <ChevronUp className="h-4 w-4 mr-1" />
+                                            Show less
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ChevronDown className="h-4 w-4 mr-1" />
+                                            Show more ({workspaces.length - 3} more)
+                                        </>
+                                    )}
+                                </Button>
+                            )}
+                        </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {workspaces.map((workspace) => (
+                            {displayedWorkspaces.map((workspace) => (
                                 <Card 
                                     key={workspace._id} 
                                     className="hover:shadow-lg transition-all duration-200 cursor-pointer border-2 hover:border-theme-lightgreen group"
@@ -201,6 +243,50 @@ const DocumentsPage = () => {
                                 </Card>
                             ))}
                         </div>
+
+                        {/* Show more/less section for mobile or when expanded */}
+                        {hasMoreWorkspaces && showAllWorkspaces && (
+                            <div className="mt-6 text-center">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowAllWorkspaces(false)}
+                                    className="border-theme-green text-theme-green hover:bg-theme-green hover:text-white"
+                                >
+                                    <ChevronUp className="h-4 w-4 mr-2" />
+                                    Show less workspaces
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Quick stats section */}
+                        {workspaces.length > 0 && (
+                            <div className="mt-8 p-4 bg-theme-lightgreen/5 rounded-lg border border-theme-lightgreen/20">
+                                <div className="flex items-center justify-between text-sm">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <FolderPlus className="h-4 w-4 text-theme-green" />
+                                            <span className="font-medium">Total Workspaces:</span>
+                                            <span className="text-theme-green font-semibold">{workspaces.length}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="h-4 w-4 text-theme-green" />
+                                            <span className="font-medium">Active:</span>
+                                            <span className="text-theme-green font-semibold">{workspaces.length}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={workspaceModal.onOpen}
+                                        className="text-theme-green hover:bg-theme-green hover:text-white"
+                                    >
+                                        <FolderPlus className="h-4 w-4 mr-1" />
+                                        New Workspace
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
