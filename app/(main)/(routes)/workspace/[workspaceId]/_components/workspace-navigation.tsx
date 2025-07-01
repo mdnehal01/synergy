@@ -175,10 +175,6 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                 </div>
 
                 <div>
-                    {/* <UserItem/> */}
-
-                  <h1>HHHHHDASKJB</h1>
-                    
                     {/* Workspace Header */}
                     <div className="px-3 py-2 border-b border-theme-lightgreen/20">
                         <div className="flex items-center gap-2 mb-2">
