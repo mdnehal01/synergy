@@ -42,20 +42,14 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
     const navbarRef = useRef<ElementRef<"div">>(null)
     const [isResetting, setIsResetting] = useState(false)
     const [isCollapsed, setIsCollapsed] = useState(isMobile)
-    const [dragOver, setDragOver] = useState(false)
     
     const create = useMutation(api.documents.create)
-    const moveDocument = useMutation(api.documents.moveDocument)
-    const reorderDocuments = useMutation(api.documents.reorderDocuments)
     const search = useSearch()
     
     // Get documents for this workspace
     const documents = useQuery(api.documents.getByWorkspace, {
         workspaceId: workspace._id
     })
-
-    // Filter to only show top-level documents (no parent)
-    const topLevelDocuments = documents?.filter(doc => !doc.isArchived && !doc.parentDocument) || []
 
     useEffect(() => {
         if (isMobile) {
@@ -155,68 +149,8 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
         targetId: Id<"documents">, 
         position: "before" | "after"
     ) => {
-        try {
-            await reorderDocuments({
-                documentId,
-                targetDocumentId: targetId,
-                position
-            });
-            toast.success("Document reordered successfully!");
-        } catch (error) {
-            toast.error("Failed to reorder document");
-            console.error("Reorder error:", error);
-        }
-    }
-
-    // Handle drag and drop from external sources (like main sidebar)
-    const handleWorkspaceDragOver = (e: React.DragEvent) => {
-        e.preventDefault()
-        e.dataTransfer.dropEffect = "move"
-        setDragOver(true)
-    }
-
-    const handleWorkspaceDragLeave = (e: React.DragEvent) => {
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-        const x = e.clientX
-        const y = e.clientY
-        
-        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-            setDragOver(false)
-        }
-    }
-
-    const handleWorkspaceDrop = async (e: React.DragEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        setDragOver(false)
-        
-        const draggedId = e.dataTransfer.getData("text/plain") as Id<"documents">
-        if (!draggedId) return
-
-        try {
-            let dragData
-            try {
-                dragData = JSON.parse(e.dataTransfer.getData("application/json"))
-            } catch {
-                dragData = { documentId: draggedId }
-            }
-
-            // Move document to this workspace (as top-level document)
-            const promise = moveDocument({
-                id: draggedId,
-                targetParentId: undefined, // Make it top-level
-                targetWorkspaceId: workspace._id
-            })
-            
-            toast.promise(promise, {
-                loading: "Moving document to workspace...",
-                success: "Document moved to workspace successfully!",
-                error: "Failed to move document to workspace"
-            })
-        } catch (error) {
-            console.error("Workspace drop operation failed:", error)
-            toast.error("Failed to move document to workspace")
-        }
+        // You can implement reordering logic here if needed
+        console.log("Reorder not implemented for workspace documents yet")
     }
 
     return (
@@ -226,12 +160,8 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                 className={cn(
                     'group/sidebar h-full bg-theme-green overflow-y-auto relative flex w-60 flex-col z-[99999] text-white',
                     isResetting && "transition-all duration-300 ease-in-out",
-                    isMobile && "w-0",
-                    dragOver && "bg-theme-lightgreen/20 border-r-4 border-theme-lightgreen"
+                    isMobile && "w-0"
                 )}
-                onDragOver={handleWorkspaceDragOver}
-                onDragLeave={handleWorkspaceDragLeave}
-                onDrop={handleWorkspaceDrop}
             >
                 <div 
                     onClick={collapse} 
@@ -243,15 +173,6 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                 >
                     <ChevronsLeft className='h-6 w-6 text-white group-hover/boox:text-theme-lightgreen transition-colors'/>
                 </div>
-
-                {/* Drop indicator */}
-                {dragOver && (
-                    <div className="absolute inset-0 bg-theme-lightgreen/10 border-2 border-dashed border-theme-lightgreen flex items-center justify-center z-50">
-                        <div className="bg-theme-green text-white px-4 py-2 rounded-lg shadow-lg">
-                            <p className="text-sm font-medium">Drop to move to workspace</p>
-                        </div>
-                    </div>
-                )}
 
                 <div>
                     <UserItem/>
@@ -305,7 +226,7 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                     <div className="px-3 mb-2">
                         <h3 className="text-sm font-medium text-white/80 flex items-center gap-2">
                             <FileText className="h-4 w-4" />
-                            Workspace Notes ({topLevelDocuments.length})
+                            Workspace Notes
                         </h3>
                     </div>
                     
@@ -313,10 +234,10 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                         // Loading state
                         <div className="space-y-2 px-3">
                             {[...Array(3)].map((_, i) => (
-                                <Item.Skeleton key={i} level={0} />
+                                <div key={i} className="h-8 bg-theme-lightgreen/20 rounded animate-pulse" />
                             ))}
                         </div>
-                    ) : topLevelDocuments.length === 0 ? (
+                    ) : documents?.length === 0 ? (
                         // Empty state
                         <div className="text-center py-4 px-3">
                             <FileText className="h-8 w-8 text-white/40 mx-auto mb-2" />
@@ -333,9 +254,9 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                             </Button>
                         </div>
                     ) : (
-                        // Documents list with drag and drop support
+                        // Documents list
                         <div className="space-y-1">
-                            {topLevelDocuments.map((document) => (
+                            {documents?.map((document) => (
                                 <Item
                                     key={document._id}
                                     id={document._id}
@@ -345,7 +266,6 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                                     documentIcon={document.icon}
                                     isActive={params.documentId === document._id}
                                     level={0}
-                                    workspaceId={workspace._id}
                                     onReorder={handleReorder}
                                 />
                             ))}

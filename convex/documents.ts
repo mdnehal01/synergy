@@ -132,15 +132,8 @@ export const getByWorkspace = query({
       )
       .collect();
 
-    // Sort by order field, then by creation time
-    return documents.sort((a, b) => {
-      if (a.order !== undefined && b.order !== undefined) {
-        return a.order - b.order;
-      }
-      if (a.order !== undefined) return -1;
-      if (b.order !== undefined) return 1;
-      return b._creationTime - a._creationTime;
-    });
+    // Sort by creation time (newest first)
+    return documents.sort((a, b) => b._creationTime - a._creationTime);
   }
 });
 
