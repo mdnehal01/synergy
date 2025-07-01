@@ -1,7 +1,7 @@
 "use client"
 
 import { useCoverImage } from "@/hooks/use-cover-image"
-import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { useState } from "react";
 import { useEdgeStore } from "@/lib/edgestore";
 import { useMutation } from "convex/react";
@@ -54,9 +54,9 @@ export const CoverImageModal = () => {
         <Dialog open={coverImage.isOpen} onOpenChange={coverImage.onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <h2 className="text-center text-lg font-semibold">
+                    <DialogTitle className="text-center text-lg font-semibold">
                         Cover Image
-                    </h2>
+                    </DialogTitle>
                 </DialogHeader>
 
                 <div>
