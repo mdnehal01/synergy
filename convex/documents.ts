@@ -90,7 +90,10 @@ export const getsidebar = query({
           .eq("parentDocument", args.parentDocument)
       )
       .filter((q) => 
-        q.eq(q.field("isArchived"), false)
+        q.and(
+          q.eq(q.field("isArchived"), false),
+          q.eq(q.field("workspaceId"), undefined) // Only show non-workspace documents
+        )
       )
       .collect()
 
@@ -158,7 +161,13 @@ export const create = mutation({
               .eq("parentDocument", args.parentDocument)
           )
           .filter((q) => 
-            q.eq(q.field("isArchived"), false)
+            q.and(
+              q.eq(q.field("isArchived"), false),
+              // Only consider documents in the same context (workspace or non-workspace)
+              args.workspaceId 
+                ? q.eq(q.field("workspaceId"), args.workspaceId)
+                : q.eq(q.field("workspaceId"), undefined)
+            )
           )
           .collect();
 
@@ -208,12 +217,13 @@ export const reorderDocuments = mutation({
       throw new Error("Unauthorized");
     }
 
-    // Make sure they have the same parent
-    if (sourceDoc.parentDocument !== targetDoc.parentDocument) {
-      throw new Error("Documents must have the same parent");
+    // Make sure they have the same parent AND same workspace context
+    if (sourceDoc.parentDocument !== targetDoc.parentDocument || 
+        sourceDoc.workspaceId !== targetDoc.workspaceId) {
+      throw new Error("Documents must have the same parent and workspace context");
     }
 
-    // Get all siblings in the same parent
+    // Get all siblings in the same parent and workspace context
     const siblings = await ctx.db
       .query("documents")
       .withIndex("by_user_parent", (q) => 
@@ -222,7 +232,12 @@ export const reorderDocuments = mutation({
           .eq("parentDocument", sourceDoc.parentDocument)
       )
       .filter((q) => 
-        q.eq(q.field("isArchived"), false)
+        q.and(
+          q.eq(q.field("isArchived"), false),
+          sourceDoc.workspaceId 
+            ? q.eq(q.field("workspaceId"), sourceDoc.workspaceId)
+            : q.eq(q.field("workspaceId"), undefined)
+        )
       )
       .collect();
 
