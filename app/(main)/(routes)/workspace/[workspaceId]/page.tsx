@@ -146,12 +146,25 @@ const WorkspacePage = () => {
                                 {document.content && (
                                     <CardContent className="pt-0">
                                         <p className="text-sm text-muted-foreground line-clamp-2">
-                                            {/* Extract text content from JSON if possible */}
                                             {(() => {
                                                 try {
                                                     const parsed = JSON.parse(document.content)
                                                     const firstBlock = parsed.find((block: any) => block.content)
-                                                    return firstBlock?.content || "No content"
+                                                    
+                                                    if (firstBlock?.content) {
+                                                        // Handle case where content is an array of objects with text property
+                                                        if (Array.isArray(firstBlock.content)) {
+                                                            return firstBlock.content
+                                                                .map((item: any) => item.text || '')
+                                                                .join('')
+                                                                .trim() || "No content"
+                                                        }
+                                                        // Handle case where content is a string
+                                                        if (typeof firstBlock.content === 'string') {
+                                                            return firstBlock.content.trim() || "No content"
+                                                        }
+                                                    }
+                                                    return "No content"
                                                 } catch {
                                                     return "No content"
                                                 }
