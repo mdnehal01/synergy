@@ -56,6 +56,7 @@ const Item: ItemComponent = ({
   const duplicate = useMutation(api.documents.duplicate);
   const moveDocument = useMutation(api.documents.moveDocument);
   const makeParent = useMutation(api.documents.makeParent);
+  const reorderDocuments = useMutation(api.documents.reorderDocuments);
   const { user } = useUser();
   const clipboard = useClipboard();
 
@@ -359,11 +360,33 @@ const Item: ItemComponent = ({
           onExpand();
         }
       } else if (dragPosition === 'before' || dragPosition === 'after') {
-        // Handle sibling reordering
-        if (onReorder) {
-          onReorder(draggedId, id, dragPosition);
+        // Check if the dragged document has the same parent and workspace context as the target
+        const draggedParent = dragData.parentDocument;
+        const draggedWorkspace = dragData.workspaceId;
+        
+        const sameParent = draggedParent === parentDocument;
+        const sameWorkspace = draggedWorkspace === workspaceId;
+        
+        if (sameParent && sameWorkspace) {
+          // Same context - use reorderDocuments for proper sibling reordering
+          if (onReorder) {
+            onReorder(draggedId, id, dragPosition);
+          } else {
+            // Fallback to reorderDocuments mutation directly
+            const promise = reorderDocuments({
+              documentId: draggedId,
+              targetDocumentId: id,
+              position: dragPosition
+            });
+            
+            toast.promise(promise, {
+              loading: "Reordering document...",
+              success: "Document reordered successfully!",
+              error: "Failed to reorder document"
+            });
+          }
         } else {
-          // Fallback: move to same parent level
+          // Different context - use moveDocument to change parent/workspace
           const promise = moveDocument({
             id: draggedId,
             targetParentId: parentDocument,
@@ -371,9 +394,9 @@ const Item: ItemComponent = ({
           });
           
           toast.promise(promise, {
-            loading: "Reordering document...",
-            success: "Document reordered successfully!",
-            error: "Failed to reorder document"
+            loading: "Moving document...",
+            success: "Document moved successfully!",
+            error: "Failed to move document"
           });
         }
       }
