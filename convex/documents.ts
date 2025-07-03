@@ -132,8 +132,54 @@ export const getByWorkspace = query({
       )
       .collect();
 
-    // Sort by creation time (newest first)
-    return documents.sort((a, b) => b._creationTime - a._creationTime);
+    // Sort by order field, then by creation time for proper hierarchy
+    return documents.sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return b._creationTime - a._creationTime;
+    });
+  }
+});
+
+export const getWorkspaceChildren = query({
+  args: {
+    workspaceId: v.id("workspaces"),
+    parentDocument: v.optional(v.id("documents"))
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    const documents = await ctx.db
+      .query("documents")
+      .withIndex("by_user_parent", (q) => 
+        q
+          .eq("userId", userId)
+          .eq("parentDocument", args.parentDocument)
+      )
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("isArchived"), false),
+          q.eq(q.field("workspaceId"), args.workspaceId)
+        )
+      )
+      .collect();
+
+    // Sort by order field, then by creation time
+    return documents.sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return b._creationTime - a._creationTime;
+    });
   }
 });
 

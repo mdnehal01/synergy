@@ -8,12 +8,10 @@ import { api } from "@/convex/_generated/api"
 import { Doc, Id } from "@/convex/_generated/dataModel"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { 
     ChevronsLeft, 
     FileText, 
-    Plus, 
     Search, 
     Settings,
     ArrowLeft,
@@ -23,13 +21,116 @@ import { toast } from "sonner"
 import { GrAdd, GrAddCircle } from 'react-icons/gr'
 import { BiTrash } from 'react-icons/bi'
 import Item from "@/app/(main)/_components/Item"
-import { DocumentList } from "@/app/(main)/_components/document-list"
 import TrashBox from "@/app/(main)/_components/trash-box"
 import { useSearch } from "@/hooks/use-search"
-import UserItem from "@/app/(main)/_components/UserItem"
 
 interface WorkspaceNavigationProps {
     workspace: Doc<"workspaces">
+}
+
+interface WorkspaceDocumentListProps {
+    parentDocumentId?: Id<"documents">
+    level?: number
+    workspaceId: Id<"workspaces">
+}
+
+const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: WorkspaceDocumentListProps) => {
+    const params = useParams()
+    const router = useRouter()
+    const reorderDocuments = useMutation(api.documents.reorderDocuments)
+    
+    const [expanded, setExpanded] = useState<Record<string, boolean>>({})
+    
+    const onExpand = (documentId: string) => {
+        setExpanded(prevExpanded => ({
+            ...prevExpanded,
+            [documentId]: !prevExpanded[documentId]
+        }))
+    }
+
+    // Get documents for this workspace and parent
+    const documents = useQuery(api.documents.getByWorkspace, { workspaceId })
+    
+    // Filter documents by parent
+    const filteredDocuments = documents?.filter(doc => 
+        doc.parentDocument === parentDocumentId && !doc.isArchived
+    ) || []
+
+    const onRedirect = (documentId: string) => {
+        router.push(`/workspace/${workspaceId}/document/${documentId}`)
+    }
+
+    const handleReorder = async (
+        documentId: Id<"documents">, 
+        targetId: Id<"documents">, 
+        position: "before" | "after"
+    ) => {
+        try {
+            await reorderDocuments({
+                documentId,
+                targetDocumentId: targetId,
+                position
+            })
+            toast.success("Document reordered successfully!")
+        } catch (error) {
+            toast.error("Failed to reorder document")
+            console.error("Reorder error:", error)
+        }
+    }
+
+    if (documents === undefined) {
+        return (
+            <>
+                <Item.Skeleton level={level}/>
+                {level === 0 && (
+                    <>
+                        <Item.Skeleton level={level}/>
+                        <Item.Skeleton level={level}/>
+                    </>
+                )}
+            </>
+        )
+    }
+
+    return (
+        <>
+            <p 
+                style={{ paddingLeft: level ? `${(level * 12) + 25}px` : undefined }}
+                className={cn(
+                    "hidden text-sm font-medium text-white/80",
+                    expanded && "last:block",
+                    level === 0 && 'hidden'
+                )}
+            >
+                No pages inside
+            </p>
+            {filteredDocuments.map((document) => (
+                <div key={document._id}>
+                    <Item
+                        id={document._id}
+                        onclick={() => onRedirect(document._id)}
+                        label={document.title}
+                        icon={<FileText size={12} className="mr-2"/>}
+                        documentIcon={document.icon}
+                        isActive={params.documentId === document._id}
+                        level={level}
+                        onExpand={() => onExpand(document._id)}
+                        expanded={expanded[document._id]}
+                        parentDocument={parentDocumentId}
+                        workspaceId={workspaceId}
+                        onReorder={handleReorder}
+                    />
+                    {expanded[document._id] && (
+                        <WorkspaceDocumentList
+                            parentDocumentId={document._id}
+                            level={level + 1}
+                            workspaceId={workspaceId}
+                        />
+                    )}
+                </div>
+            ))}
+        </>
+    )
 }
 
 const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
@@ -45,11 +146,6 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
     
     const create = useMutation(api.documents.create)
     const search = useSearch()
-    
-    // Get documents for this workspace
-    const documents = useQuery(api.documents.getByWorkspace, {
-        workspaceId: workspace._id
-    })
 
     useEffect(() => {
         if (isMobile) {
@@ -140,19 +236,6 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
         })
     }
 
-    const handleDocumentClick = (documentId: string) => {
-        router.push(`/workspace/${workspace._id}/document/${documentId}`)
-    }
-
-    const handleReorder = async (
-        documentId: Id<"documents">, 
-        targetId: Id<"documents">, 
-        position: "before" | "after"
-    ) => {
-        // You can implement reordering logic here if needed
-        console.log("Reorder not implemented for workspace documents yet")
-    }
-
     return (
         <>
             <aside 
@@ -175,7 +258,6 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                 </div>
 
                 <div>
-                  
                     {/* Workspace Header */}
                     <div className="px-3 py-2 border-b border-theme-lightgreen/20">
                         <div className="flex items-center gap-2 mb-2">
@@ -220,8 +302,8 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                     />
                 </div>
 
-                <div className='mt-4'>
-                    {/* Workspace Documents */}
+                {/* Workspace Documents Section */}
+                <div className='mt-4 border-t border-theme-lightgreen/20 pt-4'>
                     <div className="px-3 mb-2">
                         <h3 className="text-sm font-medium text-white/80 flex items-center gap-2">
                             <FileText className="h-4 w-4" />
@@ -229,48 +311,8 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                         </h3>
                     </div>
                     
-                    {documents === undefined ? (
-                        // Loading state
-                        <div className="space-y-2 px-3">
-                            {[...Array(3)].map((_, i) => (
-                                <div key={i} className="h-8 bg-theme-lightgreen/20 rounded animate-pulse" />
-                            ))}
-                        </div>
-                    ) : documents?.length === 0 ? (
-                        // Empty state
-                        <div className="text-center py-4 px-3">
-                            <FileText className="h-8 w-8 text-white/40 mx-auto mb-2" />
-                            <p className="text-xs text-white/60 mb-2">
-                                No notes in this workspace yet
-                            </p>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleCreateNote}
-                                className="text-white/80 hover:text-white hover:bg-theme-lightgreen/20 text-xs"
-                            >
-                                Create your first note
-                            </Button>
-                        </div>
-                    ) : (
-                        // Documents list
-                        <div className="space-y-1">
-                            {documents?.map((document) => (
-                                <Item
-                                    key={document._id}
-                                    id={document._id}
-                                    onclick={() => handleDocumentClick(document._id)}
-                                    label={document.title}
-                                    icon={<FileText size={12} className="mr-2"/>}
-                                    documentIcon={document.icon}
-                                    isActive={params.documentId === document._id}
-                                    level={0}
-                                    onReorder={handleReorder}
-                                />
-                            ))}
-                        </div>
-                    )}
-
+                    <WorkspaceDocumentList workspaceId={workspace._id} />
+                    
                     <Item 
                         onclick={handleCreateNote} 
                         icon={<GrAdd className='h-[18px] mr-2'/>}
