@@ -36,7 +36,7 @@ const Navigation = ()  => {
     const sidebarRef = useRef<ElementRef<"aside">>(null);
     const navbarRef = useRef<ElementRef<"div">>(null);
     const [isResetting, setIsResseting] = useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(isMobile); 
+    const [isCollapsed, setIsCollapsed] = useState(false); 
     const [showAllWorkspaces, setShowAllWorkspaces] = useState(false);
     const params = useParams();
     const search = useSearch()
