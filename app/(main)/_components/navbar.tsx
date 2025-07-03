@@ -23,15 +23,6 @@ const Navbar:React.FC<NavbarProps> = ({
         documentId:params.documentId as Id<"documents">
     });
 
-    if(document === undefined){
-        return (
-            <nav className='bg-neutral-100 dark:bg-theme-lightgreen  px-3 py-2 w-full flex items-center'>
-                {/* @ts-expect-error abc */}
-                <Title.Skeleton/>
-            </nav>
-        )
-    }
-
     if(document === null){
         return null;
     }
@@ -47,14 +38,16 @@ const Navbar:React.FC<NavbarProps> = ({
 
                 <div className='flex items-center justify-between w-full'>
                     <Title initialData={document} />
-                    <div className='flex items-center gap-x-2'>
-                        <Publish initialData={document}/>
-                        <Menu documentId={document._id}/>
-                    </div>
+                    {document && (
+                        <div className='flex items-center gap-x-2'>
+                            <Publish initialData={document}/>
+                            <Menu documentId={document._id}/>
+                        </div>
+                    )}
                 </div>
             </nav>
 
-            {document.isArchived && (
+            {document?.isArchived && (
                 <Banner documentId={document._id}/>
             )}
         </>

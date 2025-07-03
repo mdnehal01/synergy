@@ -38,11 +38,15 @@ const Navigation = ()  => {
     const [isResetting, setIsResseting] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false); 
     const [showAllWorkspaces, setShowAllWorkspaces] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
     const params = useParams();
     const search = useSearch()
     const [showSettings, setShowSettings] = useState(false);
 
-    
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
     useEffect(() => {
         if(isMobile){
             collapse()
@@ -145,10 +149,10 @@ const Navigation = ()  => {
         <>
             <aside ref={sidebarRef } className={cn('group/sidebar h-full bg-theme-green overflow-y-auto relative flex w-60 flex-col z-[99999] text-white',
                 isResetting && "transition-all duration-300 ease-in-out",
-                isMobile && "w-0"
+                isMounted && isMobile && "w-0"
             )}>
                 <div onClick={collapse } role='button' className={cn('group/boox text-muted-foreground h-6 w-6 rounded-sm hover:bg-theme-lightgreen/20 hover:text-theme-lightgreen absolute top-3 right-2 opacity-0 group-hover/sidebar:opacity-100 transition-all',
-                isMobile && "opacity-100"
+                isMounted && isMobile && "opacity-100"
                 )}>
                     <ChevronsLeft className='h-6 w-6 text-white group-hover/boox:text-theme-lightgreen transition-colors'/>
                 </div>
@@ -303,7 +307,7 @@ const Navigation = ()  => {
 
             <div className={cn('absolute top-0 z-[99999] left-60 w-[calc(100%-240px)]', 
                 isResetting && "transition-all ease-in-out duration-300",
-                isMobile && "left-0 w-full"
+                isMounted && isMobile && "left-0 w-full"
             )} 
             ref={navbarRef}
             >

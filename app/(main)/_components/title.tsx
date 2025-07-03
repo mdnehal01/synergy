@@ -8,7 +8,7 @@ import { useMutation } from 'convex/react'
 import React, { useRef, useState } from 'react'
 
 interface TitleProps{
-    initialData:Doc<"documents">;
+    initialData:Doc<"documents"> | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -22,8 +22,13 @@ const Title:React.FC<TitleProps> = ({
     const inputRef = useRef<HTMLInputElement>(null);
     const update = useMutation(api.documents.update);
 
-    const [title, setTitle] = useState(initialData.title || "Untitled");
+    const [title, setTitle] = useState(initialData?.title || "Untitled");
     const [isEditing, setIsEditing] = useState(false); 
+
+    // Handle loading state
+    if (initialData === undefined) {
+        return <Title.Skeleton />;
+    }
 
     const enableInput = () => {
         setTitle(initialData.title);
