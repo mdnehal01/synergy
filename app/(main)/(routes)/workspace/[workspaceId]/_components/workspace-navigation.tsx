@@ -48,11 +48,11 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
         }))
     }
 
-    // Get documents for this workspace and parent
-    const documents = useQuery(api.documents.getByWorkspace, { workspaceId })
+    // Get all documents for this workspace
+    const allDocuments = useQuery(api.documents.getByWorkspace, { workspaceId })
     
     // Filter documents by parent
-    const filteredDocuments = documents?.filter(doc => 
+    const documents = allDocuments?.filter(doc => 
         doc.parentDocument === parentDocumentId && !doc.isArchived
     ) || []
 
@@ -78,7 +78,14 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
         }
     }
 
-    if (documents === undefined) {
+    // Helper function to check if a document has children
+    const hasChildren = (documentId: Id<"documents">) => {
+        return allDocuments?.some(doc => 
+            doc.parentDocument === documentId && !doc.isArchived
+        ) || false
+    }
+
+    if (allDocuments === undefined) {
         return (
             <>
                 <Item.Skeleton level={level}/>
@@ -104,7 +111,7 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
             >
                 No pages inside
             </p>
-            {filteredDocuments.map((document) => (
+            {documents.map((document) => (
                 <div key={document._id}>
                     <Item
                         id={document._id}
@@ -120,7 +127,7 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
                         workspaceId={workspaceId}
                         onReorder={handleReorder}
                     />
-                    {expanded[document._id] && (
+                    {expanded[document._id] && hasChildren(document._id) && (
                         <WorkspaceDocumentList
                             parentDocumentId={document._id}
                             level={level + 1}
