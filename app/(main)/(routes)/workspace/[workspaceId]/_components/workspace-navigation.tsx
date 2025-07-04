@@ -143,7 +143,7 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
                                 paddingLeft: level ? `${(level * 12) + 12}px` : "12px"
                             }}
                             className={cn(
-                                "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
+                                "group min-h-[50px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
                                 "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:bg-white",
                                 params.documentId === document._id && "bg-white text-theme-green"
                             )}
@@ -415,6 +415,7 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                 )} 
                 ref={navbarRef}
             >
+              HDAHSD
                 {/* You can add a navbar here if needed */}
             </div>
         </>
