@@ -277,7 +277,7 @@ const Navigation = ()  => {
                         label='Add a page'
                     />
                     <Popover>
-                        <PopoverTrigger className='mt-4 w-full'>
+                        <PopoverTrigger asChild className='mt-4 w-full'>
                             <Item label='Trash'
                                 icon={<BiTrash className='h-[18px] mr-2'/>}
                             />
