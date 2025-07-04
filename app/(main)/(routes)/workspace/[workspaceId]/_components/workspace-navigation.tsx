@@ -15,7 +15,9 @@ import {
     Search, 
     Settings,
     ArrowLeft,
-    FolderOpen
+    FolderOpen,
+    ChevronDown,
+    ChevronRight
 } from "lucide-react"
 import { toast } from "sonner"
 import { GrAdd, GrAddCircle } from 'react-icons/gr'
@@ -85,6 +87,17 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
         ) || false
     }
 
+    // Enhanced click handler that auto-expands children (similar to Item.tsx)
+    const handleItemClick = (documentId: string) => {
+        // First, execute the navigation
+        onRedirect(documentId)
+        
+        // Then, if this item has children and is not currently expanded, expand it
+        if (hasChildren(documentId) && !expanded[documentId]) {
+            onExpand(documentId)
+        }
+    }
+
     if (allDocuments === undefined) {
         return (
             <>
@@ -111,31 +124,70 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
             >
                 No pages inside
             </p>
-            {documents.map((document) => (
-                <div key={document._id}>
-                    <Item
-                        id={document._id}
-                        onclick={() => onRedirect(document._id)}
-                        label={document.title}
-                        icon={<FileText size={12} className="mr-2"/>}
-                        documentIcon={document.icon}
-                        isActive={params.documentId === document._id}
-                        level={level}
-                        onExpand={() => onExpand(document._id)}
-                        expanded={expanded[document._id]}
-                        parentDocument={parentDocumentId}
-                        workspaceId={workspaceId}
-                        onReorder={handleReorder}
-                    />
-                    {expanded[document._id] && hasChildren(document._id) && (
-                        <WorkspaceDocumentList
-                            parentDocumentId={document._id}
-                            level={level + 1}
-                            workspaceId={workspaceId}
-                        />
-                    )}
-                </div>
-            ))}
+            {documents.map((document) => {
+                const documentHasChildren = hasChildren(document._id)
+                const isExpanded = expanded[document._id]
+                
+                // Chevron icons (same as Item.tsx)
+                const ChevronIcon = isExpanded ? (
+                    <ChevronDown className="h-4 w-4 shrink-0 text-white group-hover:text-theme-blue transition-colors" />
+                ) : (
+                    <ChevronRight className="h-4 w-4 shrink-0 text-white group-hover:text-theme-blue transition-colors" />
+                )
+
+                return (
+                    <div key={document._id}>
+                        <div
+                            role="button"
+                            style={{ 
+                                paddingLeft: level ? `${(level * 12) + 12}px` : "12px"
+                            }}
+                            className={cn(
+                                "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
+                                "hover:bg-theme-lightgreen/20 hover:text-theme-green hover:shadow-sm hover:bg-white",
+                                params.documentId === document._id && "bg-white text-theme-green"
+                            )}
+                            onClick={() => handleItemClick(document._id)}
+                        >
+                            {/* Chevron container - always render to maintain consistent spacing */}
+                            <div className="w-4 h-full flex items-center justify-center mr-1 shrink-0">
+                                {documentHasChildren && (
+                                    <div
+                                        role="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onExpand(document._id)
+                                        }}
+                                        className="h-full w-full rounded-sm hover:bg-neutral-200 flex items-center justify-center transition-colors"
+                                    >
+                                        {ChevronIcon}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mr-2 flex items-center justify-center shrink-0 group-hover:text-theme-green transition-colors">
+                                {document.icon ? (
+                                    <span>{document.icon}</span>
+                                ) : (
+                                    <FileText size={12} className="mr-2"/>
+                                )}
+                            </div>
+                            
+                            <span className="truncate group-hover:text-theme-green transition-colors">
+                                {document.title}
+                            </span>
+                        </div>
+                        
+                        {isExpanded && documentHasChildren && (
+                            <WorkspaceDocumentList
+                                parentDocumentId={document._id}
+                                level={level + 1}
+                                workspaceId={workspaceId}
+                            />
+                        )}
+                    </div>
+                )
+            })}
         </>
     )
 }
