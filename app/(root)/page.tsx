@@ -4,14 +4,12 @@ import Heros from "./_components/Heros";
 
  export default function Home() {
   return (
-    <div className="relative min-h-full flex flex-col">
-      <div className="flex flex-col items-center justify-center md:justify-start text-center gap-y-1 flex-1 pb-10">
+    <div className="min-h-full flex flex-col">
+      <div className="flex flex-col items-center justify-center md:justify-start text-center gap-y-8 flex-1 px-6 py-10">
         <Heading/>
         <Heros/>
-        <div className="absolute bottom-0 w-full"> 
-          <Footer/>
-        </div>
       </div>
+      <Footer/>
     </div>
   );
 }
