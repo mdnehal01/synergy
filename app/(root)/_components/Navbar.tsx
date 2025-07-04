@@ -29,10 +29,10 @@ const Navbar = () => {
         {(!isSignedIn && isLoaded) && (
           <div className='flex items-center justify-center gap-2'>
           <SignInButton mode='modal'>
-            <Button variant="ghost">Login</Button>
+            <span className='px-4 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer inline-block'>Login</span>
           </SignInButton>
           <SignInButton mode='modal'>
-            <button className='border-2 px-2 py-1 text-sm rounded-md border-theme-green bg-theme-green text-white hover:text-theme-green hover:bg-theme-lightgreen'>Get Synergie Free</button>
+            <span className='border-2 px-2 py-1 text-sm rounded-md border-theme-green bg-theme-green text-white hover:text-theme-green hover:bg-theme-lightgreen cursor-pointer inline-block'>Get Synergie Free</span>
           </SignInButton>
           </div>
         )}

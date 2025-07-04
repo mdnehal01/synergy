@@ -32,7 +32,7 @@ const Heading = () => {
             
             {isLoaded && !isSignedIn && (
                 <SignInButton mode='modal'>
-                    <button className='border-2 px-3 py-2 text-sm rounded-md border-theme-green bg-theme-green text-white hover:text-theme-green hover:bg-theme-lightgreen'>Get Synergie Free</button>
+                    <span className='border-2 px-3 py-2 text-sm rounded-md border-theme-green bg-theme-green text-white hover:text-theme-green hover:bg-theme-lightgreen cursor-pointer inline-block'>Get Synergie Free</span>
                 </SignInButton>
             )}
         </div>
