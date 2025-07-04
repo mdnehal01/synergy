@@ -140,7 +140,7 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
                         <div
                             role="button"
                             style={{ 
-                                paddingLeft: level ? `${(level * 12) + 12}px` : "12px"
+                                paddingLeft: level ? `${(level * 12) + 12}px` : "0px"
                             }}
                             className={cn(
                                 "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
