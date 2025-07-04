@@ -37,7 +37,7 @@ const Menu:React.FC<MenuProps> = ({
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger>
                 <Button size="sm" variant="ghost">
                     <MoreHorizontal className='h-4 w-4'/>
                 </Button>

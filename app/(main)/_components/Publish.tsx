@@ -59,7 +59,7 @@ const Publish = ({initialData}:PublishProps) => {
 
     return (
         <Popover>
-            <PopoverTrigger asChild>
+            <PopoverTrigger>
                 <Button size="sm" variant="ghost">
                     Publish
                     {initialData.isPublished && (

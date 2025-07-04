@@ -14,7 +14,7 @@ const ConfirmModel: React.FC<ConfirmModelProps> = ({ children, onConfirm }) => {
 
     return (
         <AlertDialog>
-            <AlertDialogTrigger onClick={(e) => e.stopPropagation()} asChild>
+            <AlertDialogTrigger onClick={(e) => e.stopPropagation()}>
                 {children}
             </AlertDialogTrigger>
             <AlertDialogContent>
