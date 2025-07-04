@@ -58,10 +58,6 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
         doc.parentDocument === parentDocumentId && !doc.isArchived
     ) || []
 
-    const onRedirect = (documentId: string) => {
-        router.push(`/workspace/${workspaceId}/document/${documentId}`)
-    }
-
     const handleReorder = async (
         documentId: Id<"documents">, 
         targetId: Id<"documents">, 
@@ -90,7 +86,7 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
     // Enhanced click handler that auto-expands children (similar to Item.tsx)
     const handleItemClick = (documentId: string) => {
         // First, execute the navigation
-        onRedirect(documentId)
+        router.push(`/workspace/${workspaceId}/document/${documentId}`)
         
         // Then, if this item has children and is not currently expanded, expand it
         if (hasChildren(documentId) && !expanded[documentId]) {
@@ -140,7 +136,7 @@ const WorkspaceDocumentList = ({ parentDocumentId, level = 0, workspaceId }: Wor
                         <div
                             role="button"
                             style={{ 
-                                paddingLeft: level ? `${(level * 12) + 12}px` : "xxxpx"
+                                paddingLeft: level ? `${(level * 12) + 12}px` : "12px"
                             }}
                             className={cn(
                                 "group min-h-[27px] py-1 pr-3 text-sm w-full transition-all duration-200 flex items-center text-white font-medium relative",
