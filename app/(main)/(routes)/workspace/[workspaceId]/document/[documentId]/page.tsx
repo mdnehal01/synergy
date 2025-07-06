@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useQuery, useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
@@ -10,6 +10,7 @@ import Cover from "@/components/cover"
 import Toolbar from "@/app/(main)/_components/toolbar"
 import Editor from "@/app/(main)/_components/Editor"
 import EditModeToggle from "@/app/(main)/_components/edit-mode-toggle"
+import { Button } from "@/components/ui/button"
 
 const WorkspaceDocumentPage = () => {
     const params = useParams()
@@ -21,6 +22,8 @@ const WorkspaceDocumentPage = () => {
     const document = useQuery(api.documents.getById, { documentId })
     const workspace = useQuery(api.workspaces.getById, { workspaceId })
     const update = useMutation(api.documents.update)
+
+    const router = useRouter();
     
     const onChange = (content: string) => {
         if (!isEditMode) return
@@ -48,7 +51,7 @@ const WorkspaceDocumentPage = () => {
             <div className="h-full flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-xl font-semibold">Document not found</h2>
-                    <p className="text-muted-foreground">The document you're looking for doesn't exist.</p>
+                    <p className="text-muted-foreground">The document you&apos;re looking for doesn&apos;t exist.</p>
                 </div>
             </div>
         )
@@ -59,7 +62,7 @@ const WorkspaceDocumentPage = () => {
             <div className="h-full flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-xl font-semibold">Workspace not found</h2>
-                    <p className="text-muted-foreground">The workspace you're looking for doesn't exist.</p>
+                    <p className="text-muted-foreground">The workspace you&apos;re looking for doesn&apos;t exist.</p>
                 </div>
             </div>
         )
@@ -74,10 +77,10 @@ const WorkspaceDocumentPage = () => {
                     Document not in workspace
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-                    This document doesn't belong to the current workspace.
+                    This document doesn&apos;t belong to the current workspace.
                 </p>
                 <div className="flex gap-4 mt-6">
-                    <Button 
+                    <Button
                         onClick={() => router.push(`/workspace/${workspaceId}`)}
                         className="bg-theme-green hover:bg-theme-lightgreen"
                     >

@@ -52,7 +52,7 @@ export const WorkspaceModal = ({ isOpen, onClose }: WorkspaceModalProps) => {
             onClose()
             
             // Navigate to the workspace (you can implement workspace routing later)
-            // router.push(`/workspace/${workspaceId}`)
+            router.push(`/workspace/${workspaceId}`)
             
         } catch (error) {
             console.error("Error creating workspace:", error)

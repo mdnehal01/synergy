@@ -32,7 +32,7 @@ const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
             <div className="h-full flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-xl font-semibold">Workspace not found</h2>
-                    <p className="text-muted-foreground">The workspace you're looking for doesn't exist.</p>
+                    <p className="text-muted-foreground">The workspace you&apos;re looking for doesn&apos;t exist.</p>
                 </div>
             </div>
         )

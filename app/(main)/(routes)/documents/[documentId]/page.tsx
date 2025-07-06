@@ -26,6 +26,7 @@ const DocumentId = ({params}:DocumentIdProps) => {
     })
 
     const update = useMutation(api.documents.update)
+    const router = useRouter();
     
     const onChange = (content:string) => {
         if (!isEditMode) return; // Prevent changes in view mode
@@ -54,7 +55,7 @@ const DocumentId = ({params}:DocumentIdProps) => {
                     Oh! There is no document related to this URL
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-                    The document you're looking for doesn't exist or may have been deleted.
+                    The document you&apos;re looking for doesn&apos;t exist or may have been deleted.
                 </p>
                 <div className="flex gap-4 mt-6">
                     <Button 
@@ -94,4 +95,4 @@ const DocumentId = ({params}:DocumentIdProps) => {
     )
 }
 
-export default DocumentId
+export default DocumentId;      

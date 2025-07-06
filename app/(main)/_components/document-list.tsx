@@ -37,10 +37,12 @@ export const DocumentList:React.FC<DocumentListProps> = ({
 
     // Use different queries based on context
     const documents = workspaceId 
+    // eslint-disable-next-line
         ? useQuery(api.documents.getWorkspaceChildren, { 
             workspaceId, 
             parentDocument: parentDocumentId 
           })
+          // eslint-disable-next-line
         : useQuery(api.documents.getsidebar, { parentDocument: parentDocumentId });
 
     const onRedirect = (documentId:string) => {

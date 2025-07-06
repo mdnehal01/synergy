@@ -149,12 +149,14 @@ const WorkspacePage = () => {
                                             {(() => {
                                                 try {
                                                     const parsed = JSON.parse(document.content)
+                                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                                     const firstBlock = parsed.find((block: any) => block.content)
                                                     
                                                     if (firstBlock?.content) {
                                                         // Handle case where content is an array of objects with text property
                                                         if (Array.isArray(firstBlock.content)) {
                                                             return firstBlock.content
+                                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                                                 .map((item: any) => item.text || '')
                                                                 .join('')
                                                                 .trim() || "No content"

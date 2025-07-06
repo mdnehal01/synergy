@@ -500,7 +500,7 @@ export const update = mutation({
     }
 
     const userId = identity.subject;
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {id, ...rest} = args; 
 
     const existingDocuments = await ctx.db.get(args.id);
