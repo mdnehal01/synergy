@@ -7,6 +7,7 @@ import Loader from '@/components/Loader';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
+import { Button } from '@/components/ui/button';
 import React from 'react'
 
 interface DocumentIdProps{

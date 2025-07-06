@@ -8,6 +8,8 @@ import Loader from '@/components/Loader';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import React, { useState } from 'react'
 
 interface DocumentIdProps{
@@ -45,7 +47,31 @@ const DocumentId = ({params}:DocumentIdProps) => {
     }
 
     if(document === null){
-        return <div>Not found</div>
+        return (
+            <div className="h-full flex flex-col items-center justify-center space-y-4">
+                <div className="text-6xl">📄</div>
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+                    Oh! There is no document related to this URL
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
+                    The document you're looking for doesn't exist or may have been deleted.
+                </p>
+                <div className="flex gap-4 mt-6">
+                    <Button 
+                        onClick={() => router.push('/documents')}
+                        className="bg-theme-green hover:bg-theme-lightgreen"
+                    >
+                        Go to Documents
+                    </Button>
+                    <Button 
+                        variant="outline"
+                        onClick={() => router.back()}
+                    >
+                        Go Back
+                    </Button>
+                </div>
+            </div>
+        )
     }
 
     return (

@@ -68,10 +68,27 @@ const WorkspaceDocumentPage = () => {
     // Verify document belongs to workspace
     if (document.workspaceId !== workspaceId) {
         return (
-            <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                    <h2 className="text-xl font-semibold">Document not in workspace</h2>
-                    <p className="text-muted-foreground">This document doesn't belong to the current workspace.</p>
+            <div className="h-full flex flex-col items-center justify-center space-y-4">
+                <div className="text-6xl">⚠️</div>
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+                    Document not in workspace
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
+                    This document doesn't belong to the current workspace.
+                </p>
+                <div className="flex gap-4 mt-6">
+                    <Button 
+                        onClick={() => router.push(`/workspace/${workspaceId}`)}
+                        className="bg-theme-green hover:bg-theme-lightgreen"
+                    >
+                        Go to Workspace
+                    </Button>
+                    <Button 
+                        variant="outline"
+                        onClick={() => router.back()}
+                    >
+                        Go Back
+                    </Button>
                 </div>
             </div>
         )
