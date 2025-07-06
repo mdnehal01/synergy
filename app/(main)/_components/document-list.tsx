@@ -37,7 +37,10 @@ export const DocumentList:React.FC<DocumentListProps> = ({
 
     // Use different queries based on context
     const documents = workspaceId 
-        ? useQuery(api.documents.getByWorkspace, { workspaceId })
+        ? useQuery(api.documents.getWorkspaceChildren, { 
+            workspaceId, 
+            parentDocument: parentDocumentId 
+          })
         : useQuery(api.documents.getsidebar, { parentDocument: parentDocumentId });
 
     const onRedirect = (documentId:string) => {

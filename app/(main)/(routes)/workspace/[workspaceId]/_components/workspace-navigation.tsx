@@ -199,14 +199,14 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                         <h3 className="text-sm font-medium text-white/80">Workspace Documents</h3>
                     </div>
                     
-                    <DocumentList workspaceId={workspace._id} />
+                    <DocumentList workspaceId={workspace._id} parentDocumentId={undefined} />
                     
                     <Item onclick={handleCreate} 
                         icon={<GrAdd  className='h-[18px] mr-2'/>}
                         label='Add a page'
                     />
                     <Popover>
-                        <PopoverTrigger className='mt-4 w-full'>
+                        <PopoverTrigger asChild className='mt-4 w-full'>
                             <Item label='Trash'
                                 icon={<BiTrash className='h-[18px] mr-2'/>}
                             />
@@ -214,7 +214,6 @@ const WorkspaceNavigation = ({ workspace }: WorkspaceNavigationProps) => {
                         <PopoverContent side={isMobile ? "bottom" : "right"}
                             className='p-0 w-72'
                         >
-                            {/* COMPONENT */}
                             <TrashBox/>
                         </PopoverContent>
                     </Popover>
