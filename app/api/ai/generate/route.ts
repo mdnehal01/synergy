@@ -13,11 +13,14 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
+      console.error('GEMINI_API_KEY not found in environment variables')
       return NextResponse.json(
         { message: 'Gemini API key not configured' },
         { status: 500 }
       )
     }
+
+    console.log('Making request to Gemini API with prompt:', prompt.substring(0, 100) + '...')
 
     // Using Gemini Pro model via REST API
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
@@ -30,16 +33,27 @@ export async function POST(request: NextRequest) {
           {
             parts: [
               {
-                text: `You are a helpful writing assistant. You are working for Synergie so you are Synergie assistant. Generate high-quality, well-structured content based on the user's prompt. Format your response in plain text with proper paragraphs and line breaks in a format which can be easily supported by BlockNote
-                
-When rephrasing text, focus on:
-- Using different vocabulary while maintaining meaning
-- Varying sentence structure and length
-- Keeping the same tone and style
-- Ensuring clarity and readability
-- Preserving all key information
+                text: `You are a helpful writing assistant for Synergie. Generate high-quality, well-structured content based on the user's prompt. 
 
-User prompt: ${prompt}`
+When rephrasing text:
+- Use different vocabulary while maintaining the exact same meaning
+- Vary sentence structure and length for better flow
+- Keep the same tone and style as the original
+- Ensure clarity and readability
+- Preserve all key information and context
+- Return only the rephrased text without additional commentary
+
+When summarizing text:
+- Extract the main points and key information
+- Keep it concise but comprehensive
+- Maintain the original meaning and context
+
+When generating more content:
+- Expand naturally on the given text
+- Add relevant details, examples, or explanations
+- Maintain consistency with the original tone and style
+
+User request: ${prompt}`
               }
             ]
           }
@@ -71,30 +85,54 @@ User prompt: ${prompt}`
       }),
     })
 
+    console.log('Gemini API response status:', response.status)
+
     if (!response.ok) {
-      const error = await response.json()
-      console.error('Gemini API error:', error)
+      const errorText = await response.text()
+      console.error('Gemini API error response:', errorText)
+      
+      let errorMessage = 'Failed to generate content from Gemini'
+      try {
+        const errorData = JSON.parse(errorText)
+        errorMessage = errorData.error?.message || errorMessage
+      } catch {
+        // If we can't parse the error, use the default message
+      }
+      
       return NextResponse.json(
-        { message: 'Failed to generate content from Gemini' },
+        { message: errorMessage },
         { status: response.status }
       )
     }
 
     const data = await response.json()
+    console.log('Gemini API response data:', JSON.stringify(data, null, 2))
+
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text
 
     if (!content) {
+      console.error('No content generated from Gemini API')
       return NextResponse.json(
         { message: 'No content generated' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ content })
+    console.log('Generated content:', content.substring(0, 100) + '...')
+
+    return NextResponse.json({ content: content.trim() })
   } catch (error) {
     console.error('AI generation error:', error)
+    
+    // Provide more specific error information
+    let errorMessage = 'Internal server error'
+    if (error instanceof Error) {
+      errorMessage = error.message
+      console.error('Error details:', error.stack)
+    }
+    
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: errorMessage },
       { status: 500 }
     )
   }

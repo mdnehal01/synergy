@@ -72,6 +72,7 @@ export const TextSelectionPopup = ({
             setResult("")
             setShowResult(true)
 
+            console.log('Making AI request:', { action, prompt: prompt.substring(0, 50) + '...', selectedText: selectedText.substring(0, 50) + '...' })
             const response = await fetch("/api/ai/generate", {
                 method: "POST",
                 headers: {
@@ -82,12 +83,23 @@ export const TextSelectionPopup = ({
                 }),
             })
 
+            console.log('Response status:', response.status)
             if (!response.ok) {
-                const error = await response.json()
+                const errorText = await response.text()
+                console.error('Error response:', errorText)
+                
+                let error
+                try {
+                    error = JSON.parse(errorText)
+                } catch {
+                    error = { message: `HTTP ${response.status}: ${errorText}` }
+                }
+                
                 throw new Error(error.message || "Failed to process text")
             }
 
             const data = await response.json()
+            console.log('Success response:', data)
             setResult(data.content)
             
         } catch (error) {
