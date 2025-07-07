@@ -28,6 +28,7 @@ interface ItemProps {
   parentDocument?: Id<"documents">;
   workspaceId?: Id<"workspaces">;
   onReorder?: (documentId: Id<"documents">, targetId: Id<"documents">, position: "before" | "after") => void;
+  showChevron?: boolean;
 }
 
 type ItemComponent = React.FC<ItemProps> & {
@@ -48,6 +49,7 @@ const Item: ItemComponent = ({
   onReorder,
   parentDocument,
   workspaceId,
+  showChevron = false,
 }) => {
 
   const router = useRouter();
@@ -66,9 +68,14 @@ const Item: ItemComponent = ({
   const [showRenameModal, setShowRenameModal] = useState(false);
 
   // Query to check if this document has children
-  const childDocuments = useQuery(api.documents.getsidebar, {
-    parentDocument: id
-  });
+  const childDocuments = showChevron && workspaceId 
+    ? useQuery(api.documents.getWorkspaceChildren, {
+        workspaceId,
+        parentDocument: id
+      })
+    : useQuery(api.documents.getsidebar, {
+        parentDocument: id
+      });
 
   const hasChildren = childDocuments && childDocuments.length > 0;
   const isChild = !!parentDocument; // Document is a child if it has a parent
@@ -467,7 +474,7 @@ const Item: ItemComponent = ({
 
         {/* Always render the chevron container div to maintain consistent spacing */}
         <div className="w-4 h-full flex items-center justify-center mr-1 shrink-0">
-          {!!id && hasChildren && (
+          {!!id && hasChildren && (showChevron || !workspaceId) && (
             <div
               role="button"
               onClick={handleExpand}

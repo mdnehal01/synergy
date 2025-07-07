@@ -112,6 +112,7 @@ export const DocumentList:React.FC<DocumentListProps> = ({
                         parentDocument={parentDocumentId}
                         workspaceId={workspaceId}
                         onReorder={handleReorder}
+                        showChevron={workspaceId ? true : undefined}
                     />
                     {expanded[document._id] && (
                         <DocumentList
