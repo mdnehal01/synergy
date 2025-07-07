@@ -105,7 +105,7 @@ export const TextSelectionPopup = ({
     }
 
     const handleRephrase = () => {
-        handleAIAction("rephrase", "Please rephrase the following text while maintaining its original meaning. Make it clearer and more engaging:")
+        handleAIAction("rephrase", "Please rephrase and rewrite the following text while maintaining its original meaning. Use different words and sentence structure but keep the same message and tone:")
     }
 
     const handleGenerateFurther = () => {

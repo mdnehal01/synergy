@@ -31,7 +31,13 @@ export async function POST(request: NextRequest) {
             parts: [
               {
                 text: `You are a helpful writing assistant. You are working for Synergie so you are Synergie assistant. Generate high-quality, well-structured content based on the user's prompt. Format your response in plain text with proper paragraphs and line breaks in a format which can be easily supported by BlockNote
-                .
+                
+When rephrasing text, focus on:
+- Using different vocabulary while maintaining meaning
+- Varying sentence structure and length
+- Keeping the same tone and style
+- Ensuring clarity and readability
+- Preserving all key information
 
 User prompt: ${prompt}`
               }
