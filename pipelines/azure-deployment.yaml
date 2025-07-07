@@ -1,0 +1,27 @@
+# Azure Pipelines configuration for deploying a Next.js application
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '20.x'
+    displayName: 'Install Node.js'
+
+  - script: |
+      npm install
+      npm run build
+    displayName: 'Install dependencies and build'
+
+  - task: AzureWebApp@1
+    inputs:
+      azureSubscription: '<Your Azure Subscription>'
+      appName: '<Your Azure App Service Name>'
+      package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+      deploymentMethod: 'zipDeploy'
