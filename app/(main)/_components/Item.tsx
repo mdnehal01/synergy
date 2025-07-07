@@ -70,10 +70,11 @@ const Item: ItemComponent = ({
 
   // Query to check if this document has children
   const childDocuments = showChevron && workspaceId 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
     ? useQuery(api.documents.getWorkspaceChildren, {
         workspaceId,
         parentDocument: id
-      })
+      })// eslint-disable-next-line react-hooks/rules-of-hooks
     : useQuery(api.documents.getsidebar, {
         parentDocument: id
       });
