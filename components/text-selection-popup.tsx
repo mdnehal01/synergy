@@ -8,7 +8,7 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 interface TextSelectionPopupProps {
-    isVisible: boolean
+    isOpen: boolean
     selectedText: string
     position: { x: number; y: number }
     onClose: () => void
@@ -16,7 +16,7 @@ interface TextSelectionPopupProps {
 }
 
 export const TextSelectionPopup = ({ 
-    isVisible, 
+    isOpen, 
     selectedText, 
     position,
     onClose, 
@@ -41,7 +41,7 @@ export const TextSelectionPopup = ({
             }
         }
 
-        if (isVisible) {
+        if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside)
             document.addEventListener('keydown', handleEscape)
         }
@@ -50,15 +50,15 @@ export const TextSelectionPopup = ({
             document.removeEventListener('mousedown', handleClickOutside)
             document.removeEventListener('keydown', handleEscape)
         }
-    }, [isVisible, onClose])
+    }, [isOpen, onClose])
 
     useEffect(() => {
-        if (!isVisible) {
+        if (!isOpen) {
             setResult("")
             setShowResult(false)
             setActiveAction(null)
         }
-    }, [isVisible])
+    }, [isOpen])
 
     const handleAIAction = async (action: string, prompt: string) => {
         if (!selectedText.trim()) {
@@ -143,7 +143,7 @@ export const TextSelectionPopup = ({
         }
     }
 
-    if (!isVisible) return null
+    if (!isOpen) return null
 
     return (
         <div

@@ -149,43 +149,6 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     }
   };
 
-  const handleTextSelection = () => {
-    if (!editor) return;
-    
-    const selection = editor.getSelection();
-    if (selection && selection.blocks.length > 0) {
-      // Extract text from selected blocks
-      const selectedText = selection.blocks
-        .map(block => {
-          if (typeof block.content === 'string') {
-            return block.content;
-          } else if (Array.isArray(block.content)) {
-            return block.content
-              .map(item => typeof item === 'object' && 'text' in item ? item.text : '')
-              .join('');
-          }
-          return '';
-        })
-        .join('\n')
-        .trim();
-
-      if (selectedText) {
-        // Get cursor position for popup placement
-        const rect = window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
-        const position = rect ? {
-          x: rect.right + 10,
-          y: rect.bottom + 10
-        } : { x: 0, y: 0 };
-        
-        textSelection.onOpen(selectedText, position);
-      } else {
-        toast.error("No text selected");
-      }
-    } else {
-      toast.error("Please select some text first");
-    }
-  };
-
   const handleInsertText = (text: string) => {
     if (!editor) return;
 
@@ -230,15 +193,6 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
         {editable && (
           <div className="mb-4 space-y-2 px-14">
             <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleTextSelection}
-                className="flex items-center gap-2 hover:bg-theme-lightgreen/10 hover:border-theme-green"
-              >
-                <Sparkles className="h-4 w-4" />
-                AI Assistant
-              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -300,18 +254,19 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
           </div>
         )}
 
-        <BlockNoteView
-          editor={editor}
-          editable={editable}
-          onSelectionChange={() => {
-            // Auto-detect text selection and show popup
+        <div
+          onMouseUp={() => {
             if (!editable) return;
             
+            // Small delay to ensure selection is complete
             setTimeout(() => {
               const selection = window.getSelection();
               if (selection && selection.toString().trim()) {
                 const selectedText = selection.toString().trim();
-                const rect = selection.getRangeAt(0).getBoundingClientRect();
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                
+                // Position popup at the end of selection
                 const position = {
                   x: rect.right + 10,
                   y: rect.bottom + 10
@@ -321,12 +276,17 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
               }
             }, 100);
           }}
-          onChange={() => {
-            if (editable) {
-              onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
-            }
-          }}
-        />
+        >
+          <BlockNoteView
+            editor={editor}
+            editable={editable}
+            onChange={() => {
+              if (editable) {
+                onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
+              }
+            }}
+          />
+        </div>
       </div>
 
       <TextSelectionPopup
