@@ -17,8 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { TextSelectionModal } from "@/components/modals/text-selection-modal";
-import { useTextSelection } from "@/hooks/use-text-selection";
 
 interface EditorProps {
   onChange: (value: string) => void;
@@ -31,7 +29,6 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPromptInput, setShowPromptInput] = useState(false);
   const [prompt, setPrompt] = useState("");
-  const textSelection = useTextSelection();
 
   const handleUpload = async (file: File) => {
     const response = await edgestore.publicFiles.upload({ file });
@@ -46,69 +43,8 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
   React.useEffect(() => {
     if (editor) {
       editor.isEditable = editable;
-      
-      // Set up text selection callback for AI features
-      textSelection.setOnInsertText((text: string) => {
-        if (editor && editable) {
-          try {
-            // Parse the text into BlockNote blocks
-            const lines = text.split('\n').filter(line => line.trim());
-            const blocks: PartialBlock[] = lines.map((line: string): PartialBlock => {
-              if (line.startsWith('# ')) {
-                return {
-                  type: "heading",
-                  props: { level: 1 },
-                  content: line.replace('# ', '').trim(),
-                };
-              } else if (line.startsWith('## ')) {
-                return {
-                  type: "heading",
-                  props: { level: 2 },
-                  content: line.replace('## ', '').trim(),
-                };
-              } else {
-                return {
-                  type: "paragraph",
-                  content: line.trim(),
-                };
-              }
-            });
-
-            if (blocks.length > 0) {
-              const currentBlock = editor.getTextCursorPosition().block;
-              editor.insertBlocks(blocks, currentBlock, "after");
-            }
-          } catch (error) {
-            console.error("Error inserting text:", error);
-            toast.error("Failed to insert text");
-          }
-        }
-      });
     }
-  }, [editor, editable, textSelection]);
-
-  // Handle text selection and copy events
-  React.useEffect(() => {
-    if (!editable) return;
-
-    const handleCopy = (event: ClipboardEvent) => {
-      const selection = window.getSelection();
-      const selectedText = selection?.toString().trim();
-      
-      if (selectedText && selectedText.length > 10) {
-        // Small delay to ensure copy operation completes
-        setTimeout(() => {
-          textSelection.onOpen(selectedText);
-        }, 100);
-      }
-    };
-
-    document.addEventListener('copy', handleCopy);
-    
-    return () => {
-      document.removeEventListener('copy', handleCopy);
-    };
-  }, [editable, textSelection]);
+  }, [editor, editable]);
 
   const insertAIContent = useCallback(async (userPrompt: string) => {
     if (!userPrompt.trim()) {
@@ -284,13 +220,6 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
             onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
           }
         }}
-      />
-      
-      <TextSelectionModal
-        isOpen={textSelection.isOpen}
-        onClose={textSelection.onClose}
-        selectedText={textSelection.selectedText}
-        onInsertText={textSelection.onInsertText || (() => {})}
       />
     </div>
   );
