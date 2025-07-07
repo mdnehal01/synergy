@@ -5,13 +5,15 @@ import { create } from 'zustand'
 interface TextSelectionStore {
     isOpen: boolean
     selectedText: string
-    onOpen: (text: string) => void
+    position: { x: number; y: number }
+    onOpen: (text: string, position: { x: number; y: number }) => void
     onClose: () => void
 }
 
 export const useTextSelection = create<TextSelectionStore>((set) => ({
     isOpen: false,
     selectedText: "",
-    onOpen: (text: string) => set({ isOpen: true, selectedText: text }),
-    onClose: () => set({ isOpen: false, selectedText: "" })
+    position: { x: 0, y: 0 },
+    onOpen: (text: string, position: { x: number; y: number }) => set({ isOpen: true, selectedText: text, position }),
+    onClose: () => set({ isOpen: false, selectedText: "", position: { x: 0, y: 0 } })
 }))

@@ -18,7 +18,7 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { useTextSelection } from "@/hooks/use-text-selection";
-import { TextSelectionModal } from "@/components/modals/text-selection-modal";
+import { TextSelectionPopup } from "@/components/text-selection-popup";
 
 interface EditorProps {
   onChange: (value: string) => void;
@@ -170,7 +170,14 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
         .trim();
 
       if (selectedText) {
-        textSelection.onOpen(selectedText);
+        // Get cursor position for popup placement
+        const rect = window.getSelection()?.getRangeAt(0)?.getBoundingClientRect();
+        const position = rect ? {
+          x: rect.right + 10,
+          y: rect.bottom + 10
+        } : { x: 0, y: 0 };
+        
+        textSelection.onOpen(selectedText, position);
       } else {
         toast.error("No text selected");
       }
@@ -296,6 +303,24 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
         <BlockNoteView
           editor={editor}
           editable={editable}
+          onSelectionChange={() => {
+            // Auto-detect text selection and show popup
+            if (!editable) return;
+            
+            setTimeout(() => {
+              const selection = window.getSelection();
+              if (selection && selection.toString().trim()) {
+                const selectedText = selection.toString().trim();
+                const rect = selection.getRangeAt(0).getBoundingClientRect();
+                const position = {
+                  x: rect.right + 10,
+                  y: rect.bottom + 10
+                };
+                
+                textSelection.onOpen(selectedText, position);
+              }
+            }, 100);
+          }}
           onChange={() => {
             if (editable) {
               onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
@@ -304,10 +329,11 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
         />
       </div>
 
-      <TextSelectionModal
+      <TextSelectionPopup
         isOpen={textSelection.isOpen}
-        onClose={textSelection.onClose}
         selectedText={textSelection.selectedText}
+        position={textSelection.position}
+        onClose={textSelection.onClose}
         onInsertText={handleInsertText}
       />
     </>
