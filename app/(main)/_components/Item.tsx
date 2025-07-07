@@ -66,6 +66,7 @@ const Item: ItemComponent = ({
   const [dragOver, setDragOver] = useState(false);
   const [dragPosition, setDragPosition] = useState<'before' | 'after' | 'child'>('before');
   const [showRenameModal, setShowRenameModal] = useState(false);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
   // Query to check if this document has children
   const childDocuments = showChevron && workspaceId 
@@ -279,6 +280,14 @@ const Item: ItemComponent = ({
     }
   }
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!!id) {
+      setContextMenuOpen(true);
+    }
+  };
+
   // Enhanced Drag and Drop handlers
   const handleDragStart = (e: React.DragEvent) => {
     if (!id || isSearch) return;
@@ -461,6 +470,7 @@ const Item: ItemComponent = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onContextMenu={handleContextMenu}
       >
         {/* Drag handle - only show for documents that can be dragged */}
         {!!id && !isSearch && (
@@ -517,10 +527,14 @@ const Item: ItemComponent = ({
               <BiPlus className="text-white group-hover:text-theme-lightgreen transition-colors"/> 
              </div>
 
-             <DropdownMenu>
-              <DropdownMenuTrigger onClick={(e) => {
-                e.stopPropagation();
-              }} asChild>
+             <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
+              <DropdownMenuTrigger 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setContextMenuOpen(true);
+                }} 
+                asChild
+              >
                 <div 
                   role="button" 
                   className="opacity-0 group-hover:opacity-100 h-full ml-auto rounded-sm hover:bg-theme-green/20 hover:text-theme-lightgreen p-1 transition-all"
@@ -528,7 +542,13 @@ const Item: ItemComponent = ({
                   <BiDotsHorizontal size={15} className="text-white group-hover:text-theme-lightgreen transition-colors"/>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-60" align="start" side="right" forceMount>
+              <DropdownMenuContent 
+                className="w-60" 
+                align="start" 
+                side="right" 
+                forceMount
+                onCloseAutoFocus={(e) => e.preventDefault()}
+              >
                 <DropdownMenuItem onClick={onRename} className="hover:bg-theme-lightgreen/10 hover:text-theme-green transition-colors">
                   <Edit3 className="mr-2 h-4 w-4"/>
                   Rename
