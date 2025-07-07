@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useQuery, useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import Loader from "@/components/Loader"
 import Cover from "@/components/cover"
 import Toolbar from "@/app/(main)/_components/toolbar"
@@ -18,6 +18,7 @@ const WorkspaceDocumentPage = () => {
     const workspaceId = params.workspaceId as Id<"workspaces">
     
     const [isEditMode, setIsEditMode] = useState(false)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     
     const document = useQuery(api.documents.getById, { documentId })
     const workspace = useQuery(api.workspaces.getById, { workspaceId })
@@ -28,11 +29,28 @@ const WorkspaceDocumentPage = () => {
     const onChange = (content: string) => {
         if (!isEditMode) return
         
-        update({
-            id: documentId,
-            content
-        })
+        // Clear any existing timeout
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current)
+        }
+        
+        // Set a new timeout to debounce the update
+        timeoutRef.current = setTimeout(() => {
+            update({
+                id: documentId,
+                content
+            })
+        }, 300) // 300ms debounce delay
     }
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
+        }
+    }, [])
 
     const toggleEditMode = () => {
         setIsEditMode(prev => !prev)
