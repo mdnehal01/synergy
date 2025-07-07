@@ -11,7 +11,7 @@ import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import "@blocknote/core/style.css";
 
-import React, { useCallback, useState, useRef, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import { useEdgeStore } from "@/lib/edgestore";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
@@ -32,7 +32,6 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
   const [showPromptInput, setShowPromptInput] = useState(false);
   const [prompt, setPrompt] = useState("");
   const textSelection = useTextSelection();
-  const isSettingContentProgrammatically = useRef(false);
 
   const handleUpload = async (file: File) => {
     const response = await edgestore.publicFiles.upload({ file });
@@ -40,31 +39,11 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
   };
 
   const editor: BlockNoteEditor = useCreateBlockNote({
+    initialContent: initialContent ? (JSON.parse(initialContent) as PartialBlock[]) : undefined,
     uploadFile: editable ? handleUpload : undefined,
   });
 
-  // Set initial content after editor is created
-  useEffect(() => {
-    if (editor && initialContent && !isSettingContentProgrammatically.current) {
-      try {
-        // Check if current content matches initial content to prevent unnecessary updates
-        const currentContent = JSON.stringify(editor.topLevelBlocks);
-        if (currentContent === initialContent) {
-          return;
-        }
-        
-        isSettingContentProgrammatically.current = true;
-        const parsedContent = JSON.parse(initialContent) as PartialBlock[];
-        editor.replaceBlocks(editor.topLevelBlocks, parsedContent);
-        isSettingContentProgrammatically.current = false;
-      } catch (error) {
-        console.error("Error setting initial content:", error);
-        isSettingContentProgrammatically.current = false;
-      }
-    }
-  }, [editor, initialContent]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     if (editor) {
       editor.isEditable = editable;
       
@@ -72,7 +51,6 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
       textSelection.setOnInsertText((text: string) => {
         if (editor && editable) {
           try {
-            isSettingContentProgrammatically.current = true;
             // Parse the text into BlockNote blocks
             const lines = text.split('\n').filter(line => line.trim());
             const blocks: PartialBlock[] = lines.map((line: string): PartialBlock => {
@@ -99,14 +77,10 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
             if (blocks.length > 0) {
               const currentBlock = editor.getTextCursorPosition().block;
               editor.insertBlocks(blocks, currentBlock, "after");
-            } else {
-              isSettingContentProgrammatically.current = false;
             }
-            isSettingContentProgrammatically.current = false;
           } catch (error) {
             console.error("Error inserting text:", error);
             toast.error("Failed to insert text");
-            isSettingContentProgrammatically.current = false;
           }
         }
       });
@@ -114,7 +88,7 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
   }, [editor, editable, textSelection]);
 
   // Handle text selection and copy events
-  useEffect(() => {
+  React.useEffect(() => {
     if (!editable) return;
 
     const handleCopy = (event: ClipboardEvent) => {
@@ -200,17 +174,14 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
           throw new Error("Generated content is empty.");
         }
 
-        isSettingContentProgrammatically.current = true;
         const currentBlock = editor.getTextCursorPosition().block;
         editor.insertBlocks(blocks, currentBlock, "after");
-        isSettingContentProgrammatically.current = false;
         toast.success("Content generated and inserted successfully!");
       }
     } catch (error) {
       console.error("AI generation error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to generate content");
     } finally {
-      isSettingContentProgrammatically.current = false;
       setIsGenerating(false);
       toast.dismiss();
     }
@@ -309,7 +280,7 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
         editor={editor}
         editable={editable}
         onChange={() => {
-          if (editable && !isSettingContentProgrammatically.current) {
+          if (editable) {
             onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
           }
         }}

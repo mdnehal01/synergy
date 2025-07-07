@@ -10,7 +10,7 @@ import { Id } from '@/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState } from 'react'
 
 interface DocumentIdProps{
     params: {
@@ -20,7 +20,6 @@ interface DocumentIdProps{
 
 const DocumentId = ({params}:DocumentIdProps) => {
     const [isEditMode, setIsEditMode] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     
     const document = useQuery(api.documents.getById, {
         documentId:params.documentId
@@ -32,28 +31,11 @@ const DocumentId = ({params}:DocumentIdProps) => {
     const onChange = (content:string) => {
         if (!isEditMode) return; // Prevent changes in view mode
         
-        // Clear any existing timeout
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
-        
-        // Set a new timeout to debounce the update
-        timeoutRef.current = setTimeout(() => {
-            update({
-                id: params.documentId,
-                content
-            });
-        }, 300); // 300ms debounce delay
+        update({
+            id:params.documentId,
+            content
+        });
     }
-
-    // Cleanup timeout on unmount
-    useEffect(() => {
-        return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-        };
-    }, []);
 
     const toggleEditMode = () => {
         setIsEditMode(prev => !prev);
