@@ -24,9 +24,8 @@ export const TextSelectionPopup = ({
 }: TextSelectionPopupProps) => {
     const [isProcessing, setIsProcessing] = useState(false)
     const [activeAction, setActiveAction] = useState<string | null>(null)
-    const [generatedContent, setGeneratedContent] = useState("")
-    const [isTyping, setIsTyping] = useState(false)
-    const [showPreview, setShowPreview] = useState(false)
+    const [isGenerating, setIsGenerating] = useState(false)
+    const [generatingProgress, setGeneratingProgress] = useState("")
     const popupRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -56,30 +55,45 @@ export const TextSelectionPopup = ({
     useEffect(() => {
         if (!isOpen) {
             setActiveAction(null)
-            setGeneratedContent("")
-            setIsTyping(false)
-            setShowPreview(false)
+            setIsGenerating(false)
+            setGeneratingProgress("")
         }
     }, [isOpen])
 
-    // Typing animation effect
-    const typeText = (text: string, speed: number = 30) => {
-        setIsTyping(true)
-        setGeneratedContent("")
-        setShowPreview(true)
+    // 3-second typing animation that inserts content automatically
+    const animateAndInsert = (text: string) => {
+        setIsGenerating(true)
+        setGeneratingProgress("")
         
-        let index = 0
-        const typeInterval = setInterval(() => {
-            if (index < text.length) {
-                setGeneratedContent(prev => prev + text[index])
-                index++
-            } else {
-                clearInterval(typeInterval)
-                setIsTyping(false)
+        // Calculate timing to make it exactly 3 seconds
+        const totalDuration = 3000 // 3 seconds
+        const steps = Math.max(text.length, 50) // Minimum 50 steps for smooth animation
+        const stepDuration = totalDuration / steps
+        
+        let currentStep = 0
+        
+        const animationInterval = setInterval(() => {
+            currentStep++
+            const progress = currentStep / steps
+            const charactersToShow = Math.floor(progress * text.length)
+            
+            setGeneratingProgress(text.substring(0, charactersToShow))
+            
+            if (currentStep >= steps) {
+                clearInterval(animationInterval)
+                
+                // Insert the full content into the editor
+                onInsertText(text)
+                toast.success("Content generated and inserted successfully!")
+                
+                // Close popup after a brief delay
+                setTimeout(() => {
+                    onClose()
+                }, 500)
             }
-        }, speed)
-
-        return () => clearInterval(typeInterval)
+        }, stepDuration)
+        
+        return () => clearInterval(animationInterval)
     }
 
     const handleAIAction = async (action: string, prompt: string) => {
@@ -122,9 +136,9 @@ export const TextSelectionPopup = ({
             console.log('Success response:', data)
             
             if (data.content) {
-                // For "Generate More", show typing animation
                 if (action === "generate") {
-                    typeText(data.content.trim())
+                    // For "Generate More", show 3-second animation and auto-insert
+                    animateAndInsert(data.content.trim())
                 } else {
                     // For other actions, insert immediately
                     onInsertText(data.content)
@@ -138,30 +152,11 @@ export const TextSelectionPopup = ({
         } catch (error) {
             console.error("AI processing error:", error)
             toast.error(error instanceof Error ? error.message : "Failed to process text")
-            setShowPreview(false)
+            setIsGenerating(false)
+            setGeneratingProgress("")
         } finally {
             setIsProcessing(false)
             setActiveAction(null)
-        }
-    }
-
-    const handleInsertGenerated = () => {
-        if (generatedContent.trim()) {
-            onInsertText(generatedContent)
-            toast.success("Generated content inserted successfully!")
-            onClose()
-        }
-    }
-
-    const handleCopyGenerated = async () => {
-        if (generatedContent.trim()) {
-            try {
-                await navigator.clipboard.writeText(generatedContent)
-                toast.success("Generated content copied to clipboard!")
-            } catch (error) {
-                console.error("Copy failed:", error)
-                toast.error("Failed to copy content")
-            }
         }
     }
 
@@ -195,11 +190,12 @@ export const TextSelectionPopup = ({
             ref={popupRef}
             className={cn(
                 "fixed z-[100000] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3",
-                "min-w-[320px] max-w-[500px]"
+                "min-w-[320px] max-w-[500px]",
+                isGenerating && "max-w-[600px]" // Wider when generating
             )}
             style={{
                 left: Math.min(position.x, window.innerWidth - 520),
-                top: Math.min(position.y + 10, window.innerHeight - (showPreview ? 400 : 200)),
+                top: Math.min(position.y + 10, window.innerHeight - (isGenerating ? 300 : 200)),
             }}
         >
             {/* Header */}
@@ -239,71 +235,45 @@ export const TextSelectionPopup = ({
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {activeAction === "generate" 
-                            ? "Generated content will appear below with typing animation"
+                            ? "Content will be generated and inserted automatically"
                             : "Content will be inserted automatically when ready"
                         }
                     </p>
                 </div>
             )}
 
-            {/* Generated Content Preview with Typing Animation */}
-            {showPreview && (
-                <div className="mb-3 border border-theme-green/20 rounded-lg overflow-hidden">
+            {/* Live Generation Preview */}
+            {isGenerating && (
+                <div className="mb-3 border border-theme-green/20 rounded-lg overflow-hidden bg-gradient-to-r from-theme-lightgreen/5 to-theme-green/5">
                     <div className="bg-theme-lightgreen/5 px-3 py-2 border-b border-theme-green/20">
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-theme-green">Generated Content</span>
-                            {isTyping && (
-                                <div className="flex items-center gap-1 text-theme-green">
-                                    <div className="w-1 h-1 bg-theme-green rounded-full animate-pulse"></div>
-                                    <div className="w-1 h-1 bg-theme-green rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                                    <div className="w-1 h-1 bg-theme-green rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                                    <span className="text-xs ml-1">Generating...</span>
-                                </div>
-                            )}
+                            <span className="text-xs font-medium text-theme-green">✨ Generating Content</span>
+                            <div className="flex items-center gap-1 text-theme-green">
+                                <div className="w-1 h-1 bg-theme-green rounded-full animate-pulse"></div>
+                                <div className="w-1 h-1 bg-theme-green rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+                                <div className="w-1 h-1 bg-theme-green rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+                                <span className="text-xs ml-1">Auto-inserting...</span>
+                            </div>
                         </div>
                     </div>
                     
                     <div className="p-3">
-                        <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                        <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed max-h-32 overflow-y-auto">
                             <span className="text-gray-500 dark:text-gray-400">{selectedText}</span>
-                            <span className="text-theme-green font-medium">{generatedContent}</span>
-                            {isTyping && (
-                                <span className="inline-block w-2 h-4 bg-theme-green ml-1 animate-pulse"></span>
-                            )}
+                            <span className="text-theme-green font-medium">{generatingProgress}</span>
+                            <span className="inline-block w-2 h-4 bg-theme-green ml-1 animate-pulse"></span>
                         </div>
-                        
-                        {!isTyping && generatedContent && (
-                            <div className="flex gap-2 mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
-                                <Button
-                                    size="sm"
-                                    onClick={handleInsertGenerated}
-                                    className="bg-theme-green hover:bg-theme-lightgreen flex items-center gap-1 h-7 text-xs"
-                                >
-                                    <Plus className="h-3 w-3" />
-                                    Insert
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleCopyGenerated}
-                                    className="flex items-center gap-1 h-7 text-xs"
-                                >
-                                    <Copy className="h-3 w-3" />
-                                    Copy
-                                </Button>
-                            </div>
-                        )}
                     </div>
                 </div>
             )}
 
             {/* Action Buttons */}
-            <div className={cn("grid grid-cols-2 gap-2", showPreview && "opacity-50 pointer-events-none")}>
+            <div className={cn("grid grid-cols-2 gap-2", (isGenerating || isProcessing) && "opacity-50 pointer-events-none")}>
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={handleSummarize}
-                    disabled={isProcessing || showPreview}
+                    disabled={isProcessing || isGenerating}
                     className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     {isProcessing && activeAction === "summarize" ? (
@@ -318,7 +288,7 @@ export const TextSelectionPopup = ({
                     variant="outline"
                     size="sm"
                     onClick={handleRephrase}
-                    disabled={isProcessing || showPreview}
+                    disabled={isProcessing || isGenerating}
                     className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     {isProcessing && activeAction === "rephrase" ? (
@@ -333,7 +303,7 @@ export const TextSelectionPopup = ({
                     variant="outline"
                     size="sm"
                     onClick={handleGenerateFurther}
-                    disabled={isProcessing || showPreview}
+                    disabled={isProcessing || isGenerating}
                     className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     {isProcessing && activeAction === "generate" ? (
@@ -348,7 +318,7 @@ export const TextSelectionPopup = ({
                     variant="outline"
                     size="sm"
                     onClick={handleCopy}
-                    disabled={isProcessing || showPreview}
+                    disabled={isProcessing || isGenerating}
                     className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     <Copy className="h-3 w-3" />
@@ -357,7 +327,7 @@ export const TextSelectionPopup = ({
             </div>
 
             {/* Help Text */}
-            {!showPreview && (
+            {!isGenerating && !isProcessing && (
                 <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
                     <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                         Select an action above to process your text with AI
