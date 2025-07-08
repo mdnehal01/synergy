@@ -75,20 +75,20 @@ export const TextSelectionPopup = ({
         const stepDuration = totalDuration / steps
         
         let currentStep = 0
-        let insertedWords = 0
+        let currentWordIndex = 0
         
         const animationInterval = setInterval(() => {
-            if (insertedWords < words.length) {
+            if (currentWordIndex < words.length) {
                 // Insert the next word with proper spacing
-                let wordToInsert = words[insertedWords]
+                let wordToInsert = words[currentWordIndex]
                 
                 // Add space before word (except for the first word)
-                if (insertedWords > 0) {
+                if (currentWordIndex > 0) {
                     wordToInsert = ' ' + wordToInsert
                 }
                 
                 onInsertText(wordToInsert)
-                insertedWords++
+                currentWordIndex++
             }
             
             currentStep++
@@ -96,8 +96,8 @@ export const TextSelectionPopup = ({
                 clearInterval(animationInterval)
                 
                 // Ensure all words are inserted
-                if (insertedWords < words.length) {
-                    const remainingWords = words.slice(insertedWords)
+                if (currentWordIndex < words.length) {
+                    const remainingWords = words.slice(currentWordIndex)
                     if (remainingWords.length > 0) {
                         const remainingText = ' ' + remainingWords.join(' ')
                         onInsertText(remainingText)

@@ -153,34 +153,16 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     if (!editor) return;
 
     try {
-      // Get the current selection info
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const selectedText = selection.toString();
-        
-        // Clear the selection and position cursor at the end
-        selection.collapseToEnd();
-        
-        // Insert the original selected text + generated content
-        editor.insertInlineContent([
-          {
-            type: "text",
-            text: selectedText + text.trim(), // Combine original + generated
-            styles: {}
-          }
-        ]);
-      } else {
-        // If no selection, just insert the generated text
-        editor.insertInlineContent([
-          {
-            type: "text",
-            text: text.trim(),
-            styles: {}
-          }
-        ]);
-      }
+      // Simply insert the text at the current cursor position
+      editor.insertInlineContent([
+        {
+          type: "text",
+          text: text,
+          styles: {}
+        }
+      ]);
       
-      toast.success("Text inserted successfully!");
+      // Don't show toast for each insertion - only show it when animation completes
     } catch (error) {
       console.error("Error inserting text:", error);
       toast.error("Failed to insert text");
