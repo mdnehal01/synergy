@@ -79,8 +79,14 @@ export const TextSelectionPopup = ({
         
         const animationInterval = setInterval(() => {
             if (insertedWords < words.length) {
-                // Insert the next word with appropriate spacing
-                const wordToInsert = insertedWords === 0 ? words[insertedWords] : ` ${words[insertedWords]}`
+                // Insert the next word with proper spacing
+                let wordToInsert = words[insertedWords]
+                
+                // Add space before word (except for the first word)
+                if (insertedWords > 0) {
+                    wordToInsert = ' ' + wordToInsert
+                }
+                
                 onInsertText(wordToInsert)
                 insertedWords++
             }
@@ -92,8 +98,10 @@ export const TextSelectionPopup = ({
                 // Ensure all words are inserted
                 if (insertedWords < words.length) {
                     const remainingWords = words.slice(insertedWords)
-                    const remainingText = remainingWords.length > 0 ? ` ${remainingWords.join(' ')}` : ''
-                    onInsertText(remainingText)
+                    if (remainingWords.length > 0) {
+                        const remainingText = ' ' + remainingWords.join(' ')
+                        onInsertText(remainingText)
+                    }
                 }
                 
                 // Dismiss loading toast and show success
