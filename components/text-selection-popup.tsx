@@ -113,15 +113,15 @@ export const TextSelectionPopup = ({
     }
 
     const handleSummarize = () => {
-        handleAIAction("summarize", "Please provide a concise summary of the following text. Keep it clear and to the point:")
+        handleAIAction("summarize", "Please provide a concise summary of the following text. Return ONLY the summary, do not repeat the original text:")
     }
 
     const handleRephrase = () => {
-        handleAIAction("rephrase", "Please rephrase and rewrite the following text while maintaining its original meaning. Use different words and sentence structure but keep the same message and tone:")
+        handleAIAction("rephrase", "Please rephrase and rewrite the following text while maintaining its original meaning. Use different words and sentence structure but keep the same message and tone. Return ONLY the rephrased version, do not include the original text:")
     }
 
     const handleGenerateFurther = () => {
-        handleAIAction("generate", "Please expand on the following text by adding more details, examples, or related information. Continue the thought naturally:")
+        handleAIAction("generate", "Please expand on the following text by adding more details, examples, or related information. Continue the thought naturally. Return ONLY the additional content that should come after the original text, do not repeat the original text:")
     }
 
     const handleCopy = async () => {

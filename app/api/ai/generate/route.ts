@@ -47,12 +47,16 @@ When summarizing text:
 - Extract the main points and key information
 - Keep it concise but comprehensive
 - Maintain the original meaning and context
+ - Return only the summary, do not include the original text
 
 When generating more content:
 - Expand naturally on the given text
 - Add relevant details, examples, or explanations
 - Maintain consistency with the original tone and style
+ - Return only the new additional content, do not repeat the original text
+ - The new content should flow naturally after the original text
 
+ IMPORTANT: Never repeat or include the original text in your response. Only provide the new content as requested.
 User request: ${prompt}`
               }
             ]
