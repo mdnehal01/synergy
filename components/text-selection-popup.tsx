@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "./ui/button"
-import { Textarea } from "./ui/textarea"
 import { Copy, Loader2, Sparkles, RefreshCw, Plus, Type, X } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -23,9 +22,7 @@ export const TextSelectionPopup = ({
     onInsertText 
 }: TextSelectionPopupProps) => {
     const [isProcessing, setIsProcessing] = useState(false)
-    const [result, setResult] = useState("")
     const [activeAction, setActiveAction] = useState<string | null>(null)
-    const [showResult, setShowResult] = useState(false)
     const popupRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -54,8 +51,6 @@ export const TextSelectionPopup = ({
 
     useEffect(() => {
         if (!isOpen) {
-            setResult("")
-            setShowResult(false)
             setActiveAction(null)
         }
     }, [isOpen])
@@ -69,8 +64,6 @@ export const TextSelectionPopup = ({
         try {
             setIsProcessing(true)
             setActiveAction(action)
-            setResult("")
-            setShowResult(true)
 
             console.log('Making AI request:', { action, prompt: prompt.substring(0, 50) + '...', selectedText: selectedText.substring(0, 50) + '...' })
             const response = await fetch("/api/ai/generate", {
@@ -100,12 +93,19 @@ export const TextSelectionPopup = ({
 
             const data = await response.json()
             console.log('Success response:', data)
-            setResult(data.content)
+            
+            if (data.content) {
+                // Automatically insert the generated content
+                onInsertText(data.content)
+                toast.success(`Text ${action}d and inserted successfully!`)
+                onClose() // Close the popup after successful insertion
+            } else {
+                throw new Error("No content generated")
+            }
             
         } catch (error) {
             console.error("AI processing error:", error)
             toast.error(error instanceof Error ? error.message : "Failed to process text")
-            setShowResult(false)
         } finally {
             setIsProcessing(false)
             setActiveAction(null)
@@ -135,26 +135,6 @@ export const TextSelectionPopup = ({
         }
     }
 
-    const handleInsertResult = () => {
-        if (result.trim()) {
-            onInsertText(result)
-            toast.success("Text inserted successfully!")
-            onClose()
-        }
-    }
-
-    const handleCopyResult = async () => {
-        if (result.trim()) {
-            try {
-                await navigator.clipboard.writeText(result)
-                toast.success("Result copied to clipboard!")
-            } catch (error) {
-                console.error("Copy failed:", error)
-                toast.error("Failed to copy result")
-            }
-        }
-    }
-
     if (!isOpen) return null
 
     return (
@@ -162,11 +142,11 @@ export const TextSelectionPopup = ({
             ref={popupRef}
             className={cn(
                 "fixed z-[100000] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3",
-                "min-w-[320px] max-w-[500px]"
+                "min-w-[320px] max-w-[400px]"
             )}
             style={{
-                left: Math.min(position.x, window.innerWidth - 520),
-                top: Math.min(position.y + 10, window.innerHeight - 400),
+                left: Math.min(position.x, window.innerWidth - 420),
+                top: Math.min(position.y + 10, window.innerHeight - 200),
             }}
         >
             {/* Header */}
@@ -180,6 +160,7 @@ export const TextSelectionPopup = ({
                     size="sm"
                     onClick={onClose}
                     className="h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    disabled={isProcessing}
                 >
                     <X className="h-3 w-3" />
                 </Button>
@@ -192,14 +173,31 @@ export const TextSelectionPopup = ({
                 </span>
             </div>
 
+            {/* Processing State */}
+            {isProcessing && (
+                <div className="mb-3 p-3 bg-theme-lightgreen/10 border border-theme-green/20 rounded-lg">
+                    <div className="flex items-center gap-2 text-theme-green">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm font-medium">
+                            {activeAction === "summarize" && "Summarizing text..."}
+                            {activeAction === "rephrase" && "Rephrasing text..."}
+                            {activeAction === "generate" && "Generating more content..."}
+                        </span>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        Content will be inserted automatically when ready
+                    </p>
+                </div>
+            )}
+
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-2 gap-2">
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={handleSummarize}
                     disabled={isProcessing}
-                    className="flex items-center gap-1 h-8 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
+                    className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     {isProcessing && activeAction === "summarize" ? (
                         <Loader2 className="h-3 w-3 animate-spin" />
@@ -214,7 +212,7 @@ export const TextSelectionPopup = ({
                     size="sm"
                     onClick={handleRephrase}
                     disabled={isProcessing}
-                    className="flex items-center gap-1 h-8 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
+                    className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     {isProcessing && activeAction === "rephrase" ? (
                         <Loader2 className="h-3 w-3 animate-spin" />
@@ -229,7 +227,7 @@ export const TextSelectionPopup = ({
                     size="sm"
                     onClick={handleGenerateFurther}
                     disabled={isProcessing}
-                    className="flex items-center gap-1 h-8 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
+                    className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     {isProcessing && activeAction === "generate" ? (
                         <Loader2 className="h-3 w-3 animate-spin" />
@@ -244,57 +242,19 @@ export const TextSelectionPopup = ({
                     size="sm"
                     onClick={handleCopy}
                     disabled={isProcessing}
-                    className="flex items-center gap-1 h-8 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
+                    className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     <Copy className="h-3 w-3" />
                     Copy
                 </Button>
             </div>
 
-            {/* Loading State */}
-            {isProcessing && (
-                <div className="flex items-center justify-center py-3 border-t border-gray-200 dark:border-gray-600">
-                    <div className="flex items-center gap-2 text-theme-green">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-xs">Processing...</span>
-                    </div>
-                </div>
-            )}
-
-            {/* Result Display */}
-            {showResult && result && (
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-3 mt-3">
-                    <div className="mb-2">
-                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">AI Result:</span>
-                    </div>
-                    <Textarea
-                        value={result}
-                        onChange={(e) => setResult(e.target.value)}
-                        className="min-h-[80px] text-xs resize-none mb-2"
-                        placeholder="AI result will appear here..."
-                    />
-                    
-                    <div className="flex gap-2 justify-end">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleCopyResult}
-                            className="flex items-center gap-1 h-7 text-xs"
-                        >
-                            <Copy className="h-3 w-3" />
-                            Copy
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={handleInsertResult}
-                            className="bg-theme-green hover:bg-theme-lightgreen flex items-center gap-1 h-7 text-xs"
-                        >
-                            <Plus className="h-3 w-3" />
-                            Insert
-                        </Button>
-                    </div>
-                </div>
-            )}
+            {/* Help Text */}
+            <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                    Select an action above to process your text with AI
+                </p>
+            </div>
         </div>
     )
 }
