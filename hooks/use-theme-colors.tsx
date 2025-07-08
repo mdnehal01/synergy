@@ -16,17 +16,10 @@ export const useThemeColors = create<ThemeColorsStore>()(
       currentTheme: 'default',
       setTheme: (theme: ColorTheme) => {
         set({ currentTheme: theme })
-        // Apply theme to document root
-        document.documentElement.setAttribute('data-color-theme', theme)
       },
     }),
     {
       name: 'synergie-color-theme',
-      onRehydrateStorage: () => (state) => {
-        if (state?.currentTheme) {
-          document.documentElement.setAttribute('data-color-theme', state.currentTheme)
-        }
-      },
     }
   )
 )

@@ -5,6 +5,7 @@ import ConvexClientProvider from "@/lib/providers/convex-provider";
 import {Toaster} from 'sonner';
 import { EdgeStoreProvider } from "@/lib/edgestore";
 import { ThemeProvider } from "@/lib/providers/theme-provider";
+import { ThemeAttributeSetter } from "@/components/theme-attribute-setter";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -41,6 +42,7 @@ export default function RootLayout({
                 enableSystem
                 disableTransitionOnChange
               >
+                <ThemeAttributeSetter />
                 {children}
               </ThemeProvider>
             </EdgeStoreProvider>
