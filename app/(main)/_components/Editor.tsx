@@ -153,34 +153,19 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     if (!editor) return;
 
     try {
-      // Parse the text into blocks
-      const lines = text.split('\n').filter(line => line.trim());
-      const blocks: PartialBlock[] = lines.map((line: string): PartialBlock => {
-        if (line.startsWith("# ")) {
-          return {
-            type: "heading",
-            props: { level: 1 },
-            content: line.replace("# ", "").trim(),
-          };
-        } else if (line.startsWith("## ")) {
-          return {
-            type: "heading",
-            props: { level: 2 },
-            content: line.replace("## ", "").trim(),
-          };
-        } else {
-          return {
-            type: "paragraph",
-            content: line.trim(),
-          };
+      // Get the current cursor position
+      const currentPosition = editor.getTextCursorPosition();
+      
+      // Insert text inline at the current cursor position
+      editor.insertInlineContent([
+        {
+          type: "text",
+          text: text,
+          styles: {}
         }
-      });
-
-      if (blocks.length > 0) {
-        const currentBlock = editor.getTextCursorPosition().block;
-        editor.insertBlocks(blocks, currentBlock, "after");
-        toast.success("Text inserted successfully!");
-      }
+      ]);
+      
+      toast.success("Text inserted successfully!");
     } catch (error) {
       console.error("Error inserting text:", error);
       toast.error("Failed to insert text");
