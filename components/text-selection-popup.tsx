@@ -65,34 +65,34 @@ export const TextSelectionPopup = ({
         // Show loading toast
         const loadingToast = toast.loading("Generating content...")
         
+        // Split text into words for word-by-word insertion
+        const words = text.trim().split(/\s+/)
+        if (words.length === 0) return
+        
         // Calculate timing to make it exactly 3 seconds
         const totalDuration = 3000 // 3 seconds
-        const steps = Math.max(text.length, 50) // Minimum 50 steps for smooth animation
+        const steps = words.length
         const stepDuration = totalDuration / steps
         
         let currentStep = 0
-        let currentText = ""
+        let insertedWords = 0
         
         const animationInterval = setInterval(() => {
-            currentStep++
-            const progress = currentStep / steps
-            const charactersToShow = Math.floor(progress * text.length)
-            
-            const newText = text.substring(0, charactersToShow)
-            
-            // Only insert the new characters (incremental)
-            if (newText.length > currentText.length) {
-                const additionalText = newText.substring(currentText.length)
-                onInsertText(additionalText)
-                currentText = newText
+            if (insertedWords < words.length) {
+                // Insert the next word with appropriate spacing
+                const wordToInsert = insertedWords === 0 ? words[insertedWords] : ` ${words[insertedWords]}`
+                onInsertText(wordToInsert)
+                insertedWords++
             }
             
+            currentStep++
             if (currentStep >= steps) {
                 clearInterval(animationInterval)
                 
-                // Ensure all content is inserted
-                if (currentText.length < text.length) {
-                    const remainingText = text.substring(currentText.length)
+                // Ensure all words are inserted
+                if (insertedWords < words.length) {
+                    const remainingWords = words.slice(insertedWords)
+                    const remainingText = ` ${remainingWords.join(' ')}`
                     onInsertText(remainingText)
                 }
                 
