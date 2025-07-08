@@ -239,8 +239,8 @@ export const TextSelectionPopup = ({
                         </span>
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {activeAction === "generate" 
-                    Content will be inserted automatically when ready
+                        {activeAction === "generate" && "Content will be inserted automatically when ready"}
+                    </p>
                 </div>
             )}
 
