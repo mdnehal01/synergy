@@ -102,6 +102,9 @@ const WorkspaceDocumentPage = () => {
             <EditModeToggle 
                 isEditMode={isEditMode}
                 onToggle={toggleEditMode}
+                showFlowToggle={true}
+                showFlowEditor={showFlowEditor}
+                onFlowToggle={toggleFlowEditor}
             />
             
             <Cover url={document.coverImage} preview={!isEditMode} />
@@ -110,8 +113,11 @@ const WorkspaceDocumentPage = () => {
                 <Toolbar initialData={document} preview={!isEditMode} />
                 <Editor
                     onChange={onChange}
+                    onFlowChange={onFlowChange}
                     initialContent={document.content}
+                    initialFlowData={document.flowData}
                     editable={isEditMode}
+                    showFlowEditor={showFlowEditor}
                 />
             </div>
         </div>

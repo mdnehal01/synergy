@@ -1,16 +1,23 @@
 "use client"
 
-import { Eye } from 'lucide-react'
+import { Eye, Workflow } from 'lucide-react'
 import React from 'react'
+import { Button } from '@/components/ui/button'
 
 interface EditModeToggleProps {
   isEditMode: boolean
   onToggle: () => void
+  showFlowToggle?: boolean
+  showFlowEditor?: boolean
+  onFlowToggle?: () => void
 }
 
 const EditModeToggle: React.FC<EditModeToggleProps> = ({
   isEditMode,
   onToggle,
+  showFlowToggle = false,
+  showFlowEditor = false,
+  onFlowToggle,
 }) => {
   return (
     <div className={`absolute top-[50px] z-50 left-1/2 right-0 px-32 -translate-x-1/2 w-full ${!isEditMode ? 'bg-neutral-200 dark:bg-neutral-950 shadow': 'bg-transparent shadow-none'} py-2 flex items-center justify-between`}>
@@ -18,7 +25,17 @@ const EditModeToggle: React.FC<EditModeToggleProps> = ({
       <div className="flex items-center gap-2 text-sm font-medium">
         {isEditMode ? (
           <>
-
+            {showFlowToggle && onFlowToggle && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onFlowToggle}
+                className={`flex items-center gap-2 ${showFlowEditor ? 'bg-theme-green text-white hover:bg-theme-lightgreen' : ''}`}
+              >
+                <Workflow className="h-4 w-4" />
+                {showFlowEditor ? 'Flow Mode' : 'Enable Flow'}
+              </Button>
+            )}
           </>
         ) : (
           <>
@@ -31,7 +48,8 @@ const EditModeToggle: React.FC<EditModeToggleProps> = ({
       </div>
 
       {/* Toggle Switch */}
-      <label className="relative inline-block w-12 h-6 cursor-pointer">
+      <div className="flex items-center gap-3">
+        <label className="relative inline-block w-12 h-6 cursor-pointer">
         <input
           type="checkbox"
           checked={isEditMode}
@@ -43,7 +61,8 @@ const EditModeToggle: React.FC<EditModeToggleProps> = ({
         {isEditMode &&
             <p className='w-44 text-xs'>Edit On</p>
         }
-      </label>
+        </label>
+      </div>
     </div>
   )
 }

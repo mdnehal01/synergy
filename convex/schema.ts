@@ -12,7 +12,8 @@ export default defineSchema({
         icon: v.optional(v.string()),
         isPublished: v.boolean(),
         order: v.optional(v.number()),
-        workspaceId: v.optional(v.id("workspaces"))
+        workspaceId: v.optional(v.id("workspaces")),
+        flowData: v.optional(v.string())
     })
     .index("by_user", ["userId"])
     .index("by_user_parent", ["userId", "parentDocument"])
