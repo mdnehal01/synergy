@@ -65,6 +65,9 @@ export const TextSelectionPopup = ({
         // Show loading toast
         const loadingToast = toast.loading("Generating content...")
         
+        // First, insert the original selected text to preserve it
+        onInsertText(selectedText)
+        
         // Split text into words for word-by-word insertion
         const words = text.trim().split(/\s+/).filter(word => word.length > 0)
         if (words.length === 0) return
@@ -82,8 +85,10 @@ export const TextSelectionPopup = ({
                 // Insert the next word with proper spacing
                 let wordToInsert = words[currentWordIndex]
                 
-                // Add space before word (except for the first word)
-                if (currentWordIndex > 0) {
+                // Add space before word (always add space since we're appending after selected text)
+                if (currentWordIndex === 0) {
+                    wordToInsert = ' ' + wordToInsert
+                } else {
                     wordToInsert = ' ' + wordToInsert
                 }
                 
@@ -157,8 +162,8 @@ export const TextSelectionPopup = ({
                     // For "Generate More", show 3-second animation directly in editor
                     animateDirectlyInEditor(data.content.trim())
                 } else {
-                    // For other actions, insert immediately
-                    onInsertText(data.content)
+                    // For other actions, insert immediately after selected text
+                    onInsertText(selectedText + ' ' + data.content)
                     toast.success(`Text ${action}d and inserted successfully!`)
                     onClose()
                 }
