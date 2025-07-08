@@ -19,14 +19,25 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { useTextSelection } from "@/hooks/use-text-selection";
 import { TextSelectionPopup } from "@/components/text-selection-popup";
+import EnhancedEditorWithFlow from "./enhanced-editor-with-flow";
 
 interface EditorProps {
   onChange: (value: string) => void;
+  onFlowChange?: (value: string) => void;
   initialContent?: string;
+  initialFlowData?: string;
   editable?: boolean;
+  showFlowEditor?: boolean;
 }
 
-const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
+const Editor = ({ 
+  onChange, 
+  onFlowChange,
+  initialContent, 
+  initialFlowData,
+  editable = true,
+  showFlowEditor = false
+}: EditorProps) => {
   const { edgestore } = useEdgeStore();
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPromptInput, setShowPromptInput] = useState(false);
@@ -168,6 +179,19 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
       toast.error("Failed to insert text");
     }
   };
+
+  // If flow editor is enabled, use the enhanced editor
+  if (showFlowEditor) {
+    return (
+      <EnhancedEditorWithFlow
+        onChange={onChange}
+        onFlowChange={onFlowChange}
+        initialContent={initialContent}
+        initialFlowData={initialFlowData}
+        editable={editable}
+      />
+    );
+  }
 
   return (
     <>
