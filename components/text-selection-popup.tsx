@@ -24,8 +24,6 @@ export const TextSelectionPopup = ({
 }: TextSelectionPopupProps) => {
     const [isProcessing, setIsProcessing] = useState(false)
     const [activeAction, setActiveAction] = useState<string | null>(null)
-    const [isGenerating, setIsGenerating] = useState(false)
-    const [generatingProgress, setGeneratingProgress] = useState("")
     const popupRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -55,15 +53,16 @@ export const TextSelectionPopup = ({
     useEffect(() => {
         if (!isOpen) {
             setActiveAction(null)
-            setIsGenerating(false)
-            setGeneratingProgress("")
         }
     }, [isOpen])
 
-    // 3-second typing animation that inserts content automatically
-    const animateAndInsert = (text: string) => {
-        setIsGenerating(true)
-        setGeneratingProgress("")
+    // 3-second typing animation directly in the editor
+    const animateDirectlyInEditor = (text: string) => {
+        // Close popup immediately
+        onClose()
+        
+        // Show loading toast
+        const loadingToast = toast.loading("Generating content...")
         
         // Calculate timing to make it exactly 3 seconds
         const totalDuration = 3000 // 3 seconds
@@ -71,25 +70,34 @@ export const TextSelectionPopup = ({
         const stepDuration = totalDuration / steps
         
         let currentStep = 0
+        let currentText = ""
         
         const animationInterval = setInterval(() => {
             currentStep++
             const progress = currentStep / steps
             const charactersToShow = Math.floor(progress * text.length)
             
-            setGeneratingProgress(text.substring(0, charactersToShow))
+            const newText = text.substring(0, charactersToShow)
+            
+            // Only insert the new characters (incremental)
+            if (newText.length > currentText.length) {
+                const additionalText = newText.substring(currentText.length)
+                onInsertText(additionalText)
+                currentText = newText
+            }
             
             if (currentStep >= steps) {
                 clearInterval(animationInterval)
                 
-                // Insert the full content into the editor
-                onInsertText(text)
-                toast.success("Content generated and inserted successfully!")
+                // Ensure all content is inserted
+                if (currentText.length < text.length) {
+                    const remainingText = text.substring(currentText.length)
+                    onInsertText(remainingText)
+                }
                 
-                // Close popup after a brief delay
-                setTimeout(() => {
-                    onClose()
-                }, 500)
+                // Dismiss loading toast and show success
+                toast.dismiss(loadingToast)
+                toast.success("Content generated and inserted successfully!")
             }
         }, stepDuration)
         
@@ -137,8 +145,8 @@ export const TextSelectionPopup = ({
             
             if (data.content) {
                 if (action === "generate") {
-                    // For "Generate More", show 3-second animation and auto-insert
-                    animateAndInsert(data.content.trim())
+                    // For "Generate More", show 3-second animation directly in editor
+                    animateDirectlyInEditor(data.content.trim())
                 } else {
                     // For other actions, insert immediately
                     onInsertText(data.content)
@@ -152,8 +160,6 @@ export const TextSelectionPopup = ({
         } catch (error) {
             console.error("AI processing error:", error)
             toast.error(error instanceof Error ? error.message : "Failed to process text")
-            setIsGenerating(false)
-            setGeneratingProgress("")
         } finally {
             setIsProcessing(false)
             setActiveAction(null)
@@ -190,12 +196,11 @@ export const TextSelectionPopup = ({
             ref={popupRef}
             className={cn(
                 "fixed z-[100000] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3",
-                "min-w-[320px] max-w-[500px]",
-                isGenerating && "max-w-[600px]" // Wider when generating
+                "min-w-[320px] max-w-[500px]"
             )}
             style={{
                 left: Math.min(position.x, window.innerWidth - 520),
-                top: Math.min(position.y + 10, window.innerHeight - (isGenerating ? 300 : 200)),
+                top: Math.min(position.y + 10, window.innerHeight - 200),
             }}
         >
             {/* Header */}
@@ -235,45 +240,19 @@ export const TextSelectionPopup = ({
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {activeAction === "generate" 
-                            ? "Content will be generated and inserted automatically"
-                            : "Content will be inserted automatically when ready"
-                        }
-                    </p>
+                    Content will be inserted automatically when ready
                 </div>
             )}
 
             {/* Live Generation Preview */}
-            {isGenerating && (
-                <div className="mb-3 border border-theme-green/20 rounded-lg overflow-hidden bg-gradient-to-r from-theme-lightgreen/5 to-theme-green/5">
-                    <div className="bg-theme-lightgreen/5 px-3 py-2 border-b border-theme-green/20">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-theme-green">✨ Generating Content</span>
-                            <div className="flex items-center gap-1 text-theme-green">
-                                <div className="w-1 h-1 bg-theme-green rounded-full animate-pulse"></div>
-                                <div className="w-1 h-1 bg-theme-green rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
-                                <div className="w-1 h-1 bg-theme-green rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
-                                <span className="text-xs ml-1">Auto-inserting...</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div className="p-3">
-                        <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed max-h-32 overflow-y-auto">
-                            <span className="text-gray-500 dark:text-gray-400">{selectedText}</span>
-                            <span className="text-theme-green font-medium">{generatingProgress}</span>
-                            <span className="inline-block w-2 h-4 bg-theme-green ml-1 animate-pulse"></span>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Action Buttons */}
-            <div className={cn("grid grid-cols-2 gap-2", (isGenerating || isProcessing) && "opacity-50 pointer-events-none")}>
+            <div className={cn("grid grid-cols-2 gap-2", isProcessing && "opacity-50 pointer-events-none")}>
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={handleSummarize}
-                    disabled={isProcessing || isGenerating}
+                    disabled={isProcessing}
                     className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     {isProcessing && activeAction === "summarize" ? (
@@ -288,7 +267,7 @@ export const TextSelectionPopup = ({
                     variant="outline"
                     size="sm"
                     onClick={handleRephrase}
-                    disabled={isProcessing || isGenerating}
+                    disabled={isProcessing}
                     className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     {isProcessing && activeAction === "rephrase" ? (
@@ -303,7 +282,7 @@ export const TextSelectionPopup = ({
                     variant="outline"
                     size="sm"
                     onClick={handleGenerateFurther}
-                    disabled={isProcessing || isGenerating}
+                    disabled={isProcessing}
                     className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     {isProcessing && activeAction === "generate" ? (
@@ -318,7 +297,7 @@ export const TextSelectionPopup = ({
                     variant="outline"
                     size="sm"
                     onClick={handleCopy}
-                    disabled={isProcessing || isGenerating}
+                    disabled={isProcessing}
                     className="flex items-center gap-1 h-9 text-xs hover:bg-theme-lightgreen/10 hover:border-theme-green"
                 >
                     <Copy className="h-3 w-3" />
@@ -327,7 +306,7 @@ export const TextSelectionPopup = ({
             </div>
 
             {/* Help Text */}
-            {!isGenerating && !isProcessing && (
+            {!isProcessing && (
                 <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
                     <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                         Select an action above to process your text with AI
