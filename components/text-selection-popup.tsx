@@ -66,7 +66,7 @@ export const TextSelectionPopup = ({
         const loadingToast = toast.loading("Generating content...")
         
         // Split text into words for word-by-word insertion
-        const words = text.trim().split(/\s+/)
+        const words = text.trim().split(/\s+/).filter(word => word.length > 0)
         if (words.length === 0) return
         
         // Calculate timing to make it exactly 3 seconds
@@ -92,7 +92,7 @@ export const TextSelectionPopup = ({
                 // Ensure all words are inserted
                 if (insertedWords < words.length) {
                     const remainingWords = words.slice(insertedWords)
-                    const remainingText = ` ${remainingWords.join(' ')}`
+                    const remainingText = remainingWords.length > 0 ? ` ${remainingWords.join(' ')}` : ''
                     onInsertText(remainingText)
                 }
                 
