@@ -3,7 +3,6 @@
 import React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "./ui/button"
-import { Textarea } from "./ui/textarea"
 import { Copy, Loader2, Sparkles, RefreshCw, Plus, Type, X } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
