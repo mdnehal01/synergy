@@ -153,21 +153,32 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     if (!editor) return;
 
     try {
-      // Get the current text cursor position
+      // Get the current selection info
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
-        // Clear the selection but keep cursor at the end of selected text
+        const selectedText = selection.toString();
+        
+        // Clear the selection and position cursor at the end
         selection.collapseToEnd();
+        
+        // Insert the original selected text + generated content
+        editor.insertInlineContent([
+          {
+            type: "text",
+            text: selectedText + text.trim(), // Combine original + generated
+            styles: {}
+          }
+        ]);
+      } else {
+        // If no selection, just insert the generated text
+        editor.insertInlineContent([
+          {
+            type: "text",
+            text: text.trim(),
+            styles: {}
+          }
+        ]);
       }
-      
-      // Insert the generated text at the cursor position (end of selection)
-      editor.insertInlineContent([
-        {
-          type: "text",
-          text: " " + text.trim(), // Add a space before the generated content
-          styles: {}
-        }
-      ]);
       
       toast.success("Text inserted successfully!");
     } catch (error) {
