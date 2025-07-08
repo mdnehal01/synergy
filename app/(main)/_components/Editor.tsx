@@ -153,14 +153,18 @@ const Editor = ({ onChange, initialContent, editable = true }: EditorProps) => {
     if (!editor) return;
 
     try {
-      // Get the current cursor position
-      const currentPosition = editor.getTextCursorPosition();
+      // Get the current text cursor position
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        // Clear the selection but keep cursor at the end of selected text
+        selection.collapseToEnd();
+      }
       
-      // Insert text inline at the current cursor position
+      // Insert the generated text at the cursor position (end of selection)
       editor.insertInlineContent([
         {
           type: "text",
-          text: text,
+          text: " " + text.trim(), // Add a space before the generated content
           styles: {}
         }
       ]);
