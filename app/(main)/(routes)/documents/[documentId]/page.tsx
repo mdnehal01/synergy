@@ -81,8 +81,8 @@ const DocumentId = ({params}:DocumentIdProps) => {
                 isEditMode={isEditMode}
                 onToggle={toggleEditMode}
                 showFlowToggle={true}
-                showFlowEditor={showFlowEditor}
-                onFlowToggle={toggleFlowEditor}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
             />
             
             <Cover url={document.coverImage} preview={!isEditMode}/>
@@ -94,7 +94,8 @@ const DocumentId = ({params}:DocumentIdProps) => {
                     initialContent={document.content}
                     initialFlowData={document.flowData}
                     editable={isEditMode}
-                    showFlowEditor={showFlowEditor}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
                 />
             </div>
         </div>

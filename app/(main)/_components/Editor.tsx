@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { useTextSelection } from "@/hooks/use-text-selection";
 import { TextSelectionPopup } from "@/components/text-selection-popup";
-import EnhancedEditorWithFlow from "./enhanced-editor-with-flow";
+import { FlowCanvasWrapper } from "@/components/flow-editor/flow-canvas";
 
 interface EditorProps {
   onChange: (value: string) => void;
@@ -28,6 +28,8 @@ interface EditorProps {
   initialFlowData?: string;
   editable?: boolean;
   showFlowEditor?: boolean;
+  viewMode?: 'editor' | 'flow' | 'split';
+  onViewModeChange?: (mode: 'editor' | 'flow' | 'split') => void;
 }
 
 const Editor = ({ 
@@ -36,7 +38,9 @@ const Editor = ({
   initialContent, 
   initialFlowData,
   editable = true,
-  showFlowEditor = false
+  showFlowEditor = false,
+  viewMode = 'editor',
+  onViewModeChange
 }: EditorProps) => {
   const { edgestore } = useEdgeStore();
   const [isGenerating, setIsGenerating] = useState(false);
@@ -180,18 +184,99 @@ const Editor = ({
     }
   };
 
-  // If flow editor is enabled, use the enhanced editor
-  if (showFlowEditor) {
-    return (
-      <EnhancedEditorWithFlow
-        onChange={onChange}
-        onFlowChange={onFlowChange}
-        initialContent={initialContent}
-        initialFlowData={initialFlowData}
-        editable={editable}
-      />
-    );
+  const handleFlowDataChange = (flowData: string) => {
+    if (onFlowChange) {
+      onFlowChange(flowData);
+    }
   }
+
+  // Render based on view mode
+  const renderContent = () => {
+    switch (viewMode) {
+      case 'flow':
+        return (
+          <div className="w-full h-[600px]">
+            <FlowCanvasWrapper
+              initialData={initialFlowData}
+              onChange={handleFlowDataChange}
+              editable={editable}
+            />
+          </div>
+        );
+      
+      case 'split':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                <span className="text-sm font-medium">Text Editor</span>
+              </div>
+              <div className="max-h-[500px] overflow-y-auto">
+                <BlockNoteView
+                  editor={editor}
+                  editable={editable}
+                  onChange={() => {
+                    if (editable) {
+                      onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                <span className="text-sm font-medium">Flow Canvas</span>
+              </div>
+              <div className="h-[500px]">
+                <FlowCanvasWrapper
+                  initialData={initialFlowData}
+                  onChange={handleFlowDataChange}
+                  editable={editable}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      
+      default: // 'editor'
+        return (
+          <div
+            onMouseUp={() => {
+              if (!editable) return;
+              
+              // Small delay to ensure selection is complete
+              setTimeout(() => {
+                const selection = window.getSelection();
+                if (selection && selection.toString().trim()) {
+                  const selectedText = selection.toString().trim();
+                  const range = selection.getRangeAt(0);
+                  const rect = range.getBoundingClientRect();
+                  
+                  // Position popup at the end of selection
+                  const position = {
+                    x: rect.right + 10,
+                    y: rect.bottom + 10
+                  };
+                  
+                  textSelection.onOpen(selectedText, position);
+                }
+              }, 100);
+            }}
+          >
+            <BlockNoteView
+              editor={editor}
+              editable={editable}
+              onChange={() => {
+                if (editable) {
+                  onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
+                }
+              }}
+            />
+          </div>
+        );
+    }
+  };
 
   return (
     <>
@@ -219,7 +304,6 @@ const Editor = ({
                 )}
               </Button>
             </div>
-
             {showPromptInput && (
               <form onSubmit={handlePromptSubmit} className="flex gap-2">
                 <Input
@@ -260,39 +344,7 @@ const Editor = ({
           </div>
         )}
 
-        <div
-          onMouseUp={() => {
-            if (!editable) return;
-            
-            // Small delay to ensure selection is complete
-            setTimeout(() => {
-              const selection = window.getSelection();
-              if (selection && selection.toString().trim()) {
-                const selectedText = selection.toString().trim();
-                const range = selection.getRangeAt(0);
-                const rect = range.getBoundingClientRect();
-                
-                // Position popup at the end of selection
-                const position = {
-                  x: rect.right + 10,
-                  y: rect.bottom + 10
-                };
-                
-                textSelection.onOpen(selectedText, position);
-              }
-            }, 100);
-          }}
-        >
-          <BlockNoteView
-            editor={editor}
-            editable={editable}
-            onChange={() => {
-              if (editable) {
-                onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
-              }
-            }}
-          />
-        </div>
+        {renderContent()}
       </div>
 
       <TextSelectionPopup

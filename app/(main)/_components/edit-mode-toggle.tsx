@@ -1,40 +1,72 @@
 "use client"
 
-import { Eye, Workflow } from 'lucide-react'
+import { Eye, Workflow, FileText, Split } from 'lucide-react'
 import React from 'react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 interface EditModeToggleProps {
   isEditMode: boolean
   onToggle: () => void
   showFlowToggle?: boolean
-  showFlowEditor?: boolean
-  onFlowToggle?: () => void
+  viewMode?: 'editor' | 'flow' | 'split'
+  onViewModeChange?: (mode: 'editor' | 'flow' | 'split') => void
 }
 
 const EditModeToggle: React.FC<EditModeToggleProps> = ({
   isEditMode,
   onToggle,
   showFlowToggle = false,
-  showFlowEditor = false,
-  onFlowToggle,
+  viewMode = 'editor',
+  onViewModeChange,
 }) => {
   return (
     <div className={`absolute top-[50px] z-50 left-1/2 right-0 px-32 -translate-x-1/2 w-full ${!isEditMode ? 'bg-neutral-200 dark:bg-neutral-950 shadow': 'bg-transparent shadow-none'} py-2 flex items-center justify-between`}>
-      {/* Mode Label with Icon */}
+      {/* View Mode Controls */}
       <div className="flex items-center gap-2 text-sm font-medium">
         {isEditMode ? (
           <>
-            {showFlowToggle && onFlowToggle && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onFlowToggle}
-                className={`flex items-center gap-2 ${showFlowEditor ? 'bg-theme-green text-white hover:bg-theme-lightgreen' : ''}`}
-              >
-                <Workflow className="h-4 w-4" />
-                {showFlowEditor ? 'Flow Mode' : 'Enable Flow'}
-              </Button>
+            {showFlowToggle && onViewModeChange && (
+              <div className="flex items-center gap-1 bg-white dark:bg-gray-700 rounded-md p-1 border">
+                <Button
+                  variant={viewMode === 'editor' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => onViewModeChange('editor')}
+                  className={cn(
+                    "flex items-center gap-2 h-8",
+                    viewMode === 'editor' && "bg-theme-green hover:bg-theme-lightgreen text-white"
+                  )}
+                >
+                  <FileText className="h-4 w-4" />
+                  Editor
+                </Button>
+                
+                <Button
+                  variant={viewMode === 'flow' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => onViewModeChange('flow')}
+                  className={cn(
+                    "flex items-center gap-2 h-8",
+                    viewMode === 'flow' && "bg-theme-green hover:bg-theme-lightgreen text-white"
+                  )}
+                >
+                  <Workflow className="h-4 w-4" />
+                  Canvas
+                </Button>
+                
+                <Button
+                  variant={viewMode === 'split' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => onViewModeChange('split')}
+                  className={cn(
+                    "flex items-center gap-2 h-8",
+                    viewMode === 'split' && "bg-theme-green hover:bg-theme-lightgreen text-white"
+                  )}
+                >
+                  <Split className="h-4 w-4" />
+                  Split
+                </Button>
+              </div>
             )}
           </>
         ) : (

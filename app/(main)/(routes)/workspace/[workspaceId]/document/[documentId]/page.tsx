@@ -103,8 +103,8 @@ const WorkspaceDocumentPage = () => {
                 isEditMode={isEditMode}
                 onToggle={toggleEditMode}
                 showFlowToggle={true}
-                showFlowEditor={showFlowEditor}
-                onFlowToggle={toggleFlowEditor}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
             />
             
             <Cover url={document.coverImage} preview={!isEditMode} />
@@ -117,7 +117,8 @@ const WorkspaceDocumentPage = () => {
                     initialContent={document.content}
                     initialFlowData={document.flowData}
                     editable={isEditMode}
-                    showFlowEditor={showFlowEditor}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
                 />
             </div>
         </div>

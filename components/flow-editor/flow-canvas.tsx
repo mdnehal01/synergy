@@ -275,7 +275,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           <Panel position="top-left" className="bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border">
             <div className="flex flex-col gap-2">
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Add Elements
+                Basic Elements
               </div>
               
               <div className="grid grid-cols-2 gap-2">
@@ -326,6 +326,38 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                   <Diamond className="h-3 w-3" />
                   Diamond
                 </Button>
+              </div>
+              
+              <div className="border-t pt-2 mt-2">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Diagram Elements
+                </div>
+                
+                <div className="grid grid-cols-1 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1 h-8"
+                    onDragStart={(event) => onDragStart(event, 'entity')}
+                    onClick={() => addNode('entity')}
+                    draggable
+                  >
+                    <Database className="h-3 w-3" />
+                    ER Entity
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1 h-8"
+                    onDragStart={(event) => onDragStart(event, 'process')}
+                    onClick={() => addNode('process')}
+                    draggable
+                  >
+                    <Zap className="h-3 w-3" />
+                    Process
+                  </Button>
+                </div>
               </div>
               
               <div className="border-t pt-2 mt-2">
