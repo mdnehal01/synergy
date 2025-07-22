@@ -20,6 +20,7 @@ interface DocumentIdProps{
 
 const DocumentId = ({params}:DocumentIdProps) => {
     const [isEditMode, setIsEditMode] = useState(false);
+    const [viewMode, setViewMode] = useState<'editor' | 'canvas' | 'split'>('editor');
     
     const document = useQuery(api.documents.getById, {
         documentId:params.documentId
@@ -34,6 +35,15 @@ const DocumentId = ({params}:DocumentIdProps) => {
         update({
             id:params.documentId,
             content
+        });
+    }
+
+    const onFlowChange = (flowData: any) => {
+        if (!isEditMode) return; // Prevent changes in view mode
+        
+        update({
+            id: params.documentId,
+            flowData
         });
     }
 

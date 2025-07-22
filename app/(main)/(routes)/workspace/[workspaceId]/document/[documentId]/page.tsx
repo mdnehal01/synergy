@@ -18,6 +18,7 @@ const WorkspaceDocumentPage = () => {
     const workspaceId = params.workspaceId as Id<"workspaces">
     
     const [isEditMode, setIsEditMode] = useState(false)
+    const [viewMode, setViewMode] = useState<'editor' | 'canvas' | 'split'>('editor')
     
     const document = useQuery(api.documents.getById, { documentId })
     const workspace = useQuery(api.workspaces.getById, { workspaceId })
@@ -31,6 +32,15 @@ const WorkspaceDocumentPage = () => {
         update({
             id: documentId,
             content
+        })
+    }
+
+    const onFlowChange = (flowData: any) => {
+        if (!isEditMode) return
+        
+        update({
+            id: documentId,
+            flowData
         })
     }
 
