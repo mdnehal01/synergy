@@ -32,18 +32,24 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize,
-  Save
+  Save,
+  Database,
+  Zap
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { CustomTextNode } from './nodes/custom-text-node'
 import { CustomShapeNode } from './nodes/custom-shape-node'
 import { CustomImageNode } from './nodes/custom-image-node'
+import { ERDiagramNode } from './nodes/er-diagram-node'
+import { ProcessNode } from './nodes/process-node'
 import { CustomEdge } from './edges/custom-edge'
 
 const nodeTypes: NodeTypes = {
   customText: CustomTextNode,
   customShape: CustomShapeNode,
   customImage: CustomImageNode,
+  erDiagram: ERDiagramNode,
+  processNode: ProcessNode,
 }
 
 const edgeTypes: EdgeTypes = {
@@ -154,6 +160,20 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         return { shape: 'diamond', label: 'Diamond', editable }
       case 'image':
         return { src: '', alt: 'Image', editable }
+      case 'entity':
+        return { 
+          entityName: 'Entity', 
+          attributes: [{ name: 'id', type: 'int', isPrimaryKey: true }], 
+          editable 
+        }
+      case 'process':
+        return { 
+          processName: 'Process', 
+          description: 'Process description', 
+          inputs: ['Input'], 
+          outputs: ['Output'], 
+          editable 
+        }
       default:
         return { label: 'Node', editable }
     }
