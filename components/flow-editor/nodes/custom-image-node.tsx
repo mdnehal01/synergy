@@ -17,7 +17,7 @@ export const CustomImageNode: React.FC<NodeProps> = ({
   data, 
   selected 
 }) => {
-  const nodeData = data as ImageNodeData
+  const nodeData = data as unknown as ImageNodeData
   const [isEditing, setIsEditing] = useState(false)
   const [imageUrl, setImageUrl] = useState(nodeData.src || '')
   const [tempUrl, setTempUrl] = useState(imageUrl)

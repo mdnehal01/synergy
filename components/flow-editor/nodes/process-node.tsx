@@ -20,7 +20,7 @@ export const ProcessNode: React.FC<NodeProps> = ({
   data, 
   selected 
 }) => {
-  const nodeData = data as ProcessNodeData
+  const nodeData = data as unknown as ProcessNodeData
   const [isEditing, setIsEditing] = useState(false)
   const [processName, setProcessName] = useState(nodeData.processName || 'Process')
   const [description, setDescription] = useState(nodeData.description || '')

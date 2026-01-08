@@ -23,7 +23,7 @@ export const ERDiagramNode: React.FC<NodeProps> = ({
   data, 
   selected 
 }) => {
-  const nodeData = data as ERDiagramNodeData
+  const nodeData = data as unknown as ERDiagramNodeData
   const [isEditing, setIsEditing] = useState(false)
   const [entityName, setEntityName] = useState(nodeData.entityName || 'Entity')
   const [attributes, setAttributes] = useState<Attribute[]>(nodeData.attributes || [])

@@ -16,7 +16,7 @@ export const CustomShapeNode: React.FC<NodeProps> = ({
   data, 
   selected 
 }) => {
-  const nodeData = data as ShapeNodeData
+  const nodeData = data as unknown as ShapeNodeData
   const [isEditing, setIsEditing] = useState(false)
   const [label, setLabel] = useState(nodeData.label || 'Shape')
   const [tempLabel, setTempLabel] = useState(label)

@@ -16,7 +16,7 @@ export const CustomTextNode: React.FC<NodeProps> = ({
   selected,
   id
 }) => {
-  const nodeData = data as TextNodeData
+  const nodeData = data as unknown as TextNodeData
   const [isEditing, setIsEditing] = useState(false)
   const [label, setLabel] = useState(nodeData.label || 'Text')
   const [tempLabel, setTempLabel] = useState(label)
