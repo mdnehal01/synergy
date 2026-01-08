@@ -18,7 +18,7 @@ const WorkspaceDocumentPage = () => {
     const workspaceId = params.workspaceId as Id<"workspaces">
     
     const [isEditMode, setIsEditMode] = useState(false)
-    const [viewMode, setViewMode] = useState<'editor' | 'canvas' | 'split'>('editor')
+    const [viewMode, setViewMode] = useState<'editor' | 'flow' | 'split'>('editor')
     
     const document = useQuery(api.documents.getById, { documentId })
     const workspace = useQuery(api.workspaces.getById, { workspaceId })

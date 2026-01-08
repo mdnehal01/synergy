@@ -19,31 +19,32 @@ interface ERDiagramNodeData {
   editable?: boolean
 }
 
-export const ERDiagramNode: React.FC<NodeProps<ERDiagramNodeData>> = ({ 
+export const ERDiagramNode: React.FC<NodeProps> = ({ 
   data, 
   selected 
 }) => {
+  const nodeData = data as ERDiagramNodeData
   const [isEditing, setIsEditing] = useState(false)
-  const [entityName, setEntityName] = useState(data.entityName || 'Entity')
-  const [attributes, setAttributes] = useState<Attribute[]>(data.attributes || [])
+  const [entityName, setEntityName] = useState(nodeData.entityName || 'Entity')
+  const [attributes, setAttributes] = useState<Attribute[]>(nodeData.attributes || [])
   const [tempEntityName, setTempEntityName] = useState(entityName)
   const [tempAttributes, setTempAttributes] = useState<Attribute[]>(attributes)
 
   const handleEdit = useCallback(() => {
-    if (!data.editable) return
+    if (!nodeData.editable) return
     setTempEntityName(entityName)
     setTempAttributes([...attributes])
     setIsEditing(true)
-  }, [entityName, attributes, data.editable])
+  }, [entityName, attributes, nodeData.editable])
 
   const handleSave = useCallback(() => {
     setEntityName(tempEntityName)
     setAttributes([...tempAttributes])
     setIsEditing(false)
     // Update the node data
-    data.entityName = tempEntityName
-    data.attributes = [...tempAttributes]
-  }, [tempEntityName, tempAttributes, data])
+    nodeData.entityName = tempEntityName
+    nodeData.attributes = [...tempAttributes]
+  }, [tempEntityName, tempAttributes, nodeData])
 
   const handleCancel = useCallback(() => {
     setTempEntityName(entityName)
@@ -75,7 +76,7 @@ export const ERDiagramNode: React.FC<NodeProps<ERDiagramNodeData>> = ({
     <div className={cn(
       "bg-white dark:bg-gray-800 border-2 rounded-lg shadow-lg min-w-[200px] group",
       selected ? 'border-theme-green' : 'border-gray-200 dark:border-gray-600',
-      data.editable ? 'hover:border-theme-lightgreen' : ''
+      nodeData.editable ? 'hover:border-theme-lightgreen' : ''
     )}>
       <Handle
         type="target"
@@ -113,7 +114,7 @@ export const ERDiagramNode: React.FC<NodeProps<ERDiagramNodeData>> = ({
         ) : (
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm">{entityName}</h3>
-            {data.editable && selected && (
+            {nodeData.editable && selected && (
               <Button
                 size="sm"
                 variant="ghost"

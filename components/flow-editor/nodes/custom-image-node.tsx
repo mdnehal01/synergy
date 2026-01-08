@@ -13,25 +13,26 @@ interface ImageNodeData {
   editable?: boolean
 }
 
-export const CustomImageNode: React.FC<NodeProps<ImageNodeData>> = ({ 
+export const CustomImageNode: React.FC<NodeProps> = ({ 
   data, 
   selected 
 }) => {
+  const nodeData = data as ImageNodeData
   const [isEditing, setIsEditing] = useState(false)
-  const [imageUrl, setImageUrl] = useState(data.src || '')
+  const [imageUrl, setImageUrl] = useState(nodeData.src || '')
   const [tempUrl, setTempUrl] = useState(imageUrl)
 
   const handleEdit = useCallback(() => {
-    if (!data.editable) return
+    if (!nodeData.editable) return
     setTempUrl(imageUrl)
     setIsEditing(true)
-  }, [imageUrl, data.editable])
+  }, [imageUrl, nodeData.editable])
 
   const handleSave = useCallback(() => {
     setImageUrl(tempUrl)
     setIsEditing(false)
-    data.src = tempUrl
-  }, [tempUrl, data])
+    nodeData.src = tempUrl
+  }, [tempUrl, nodeData])
 
   const handleCancel = useCallback(() => {
     setTempUrl(imageUrl)
@@ -50,7 +51,7 @@ export const CustomImageNode: React.FC<NodeProps<ImageNodeData>> = ({
     <div className={`
       p-2 shadow-lg rounded-lg bg-white dark:bg-gray-800 border-2 min-w-[120px] min-h-[80px] group
       ${selected ? 'border-theme-green' : 'border-gray-200 dark:border-gray-600'}
-      ${data.editable ? 'hover:border-theme-lightgreen' : ''}
+      ${nodeData.editable ? 'hover:border-theme-lightgreen' : ''}
     `}>
       <Handle
         type="target"
@@ -94,7 +95,7 @@ export const CustomImageNode: React.FC<NodeProps<ImageNodeData>> = ({
               <div className="relative w-20 h-20 rounded overflow-hidden">
                 <Image
                   src={imageUrl}
-                  alt={data.alt}
+                  alt={nodeData.alt}
                   fill
                   className="object-cover"
                   onError={() => setImageUrl('')}
@@ -106,7 +107,7 @@ export const CustomImageNode: React.FC<NodeProps<ImageNodeData>> = ({
               </div>
             )}
             
-            {data.editable && selected && (
+            {nodeData.editable && selected && (
               <Button
                 size="sm"
                 variant="ghost"

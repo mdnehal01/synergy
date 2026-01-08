@@ -7,7 +7,6 @@ import Loader from '@/components/Loader';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Button } from '@/components/ui/button';
 import React from 'react'
 
@@ -24,7 +23,6 @@ const DocumentId = ({params}:DocumentIdProps) => {
 
     const update = useMutation(api.documents.update)
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const onChange = (content:string) => {
         update({
             id:params.documentId,

@@ -5,7 +5,6 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { ElementRef, MouseEvent, useEffect, useRef, useState } from 'react'
 import { useMediaQuery } from 'usehooks-ts';
 import UserItem from '@/app/(main)/_components/UserItem';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { GrAdd, GrAddCircle } from 'react-icons/gr';
@@ -19,7 +18,6 @@ import { useSearch } from '@/hooks/use-search';
 import Navbar from '@/app/(main)/_components/navbar';
 import SettingsModal from '@/app/(main)/_components/settings-modal';
 import { Button } from '@/components/ui/button';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Doc, Id } from '@/convex/_generated/dataModel';
 
 interface WorkspaceNavigationProps {

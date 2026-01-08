@@ -5,6 +5,11 @@ import { EdgeProps, getBezierPath, EdgeLabelRenderer } from '@xyflow/react'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 
+interface CustomEdgeData {
+  editable?: boolean
+  onDelete?: (id: string) => void
+}
+
 export const CustomEdge: React.FC<EdgeProps> = ({
   id,
   sourceX,
@@ -18,6 +23,8 @@ export const CustomEdge: React.FC<EdgeProps> = ({
   selected,
   data
 }) => {
+  const edgeData = data as CustomEdgeData
+  
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
@@ -29,8 +36,8 @@ export const CustomEdge: React.FC<EdgeProps> = ({
 
   const onEdgeClick = () => {
     // Handle edge deletion or other actions
-    if (data?.onDelete) {
-      data.onDelete(id)
+    if (edgeData?.onDelete) {
+      edgeData.onDelete(id)
     }
   }
 
@@ -48,7 +55,7 @@ export const CustomEdge: React.FC<EdgeProps> = ({
         markerEnd={markerEnd}
       />
       
-      {selected && data?.editable && (
+      {selected && edgeData?.editable && (
         <EdgeLabelRenderer>
           <div
             style={{

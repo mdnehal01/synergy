@@ -20,7 +20,7 @@ interface DocumentIdProps{
 
 const DocumentId = ({params}:DocumentIdProps) => {
     const [isEditMode, setIsEditMode] = useState(false);
-    const [viewMode, setViewMode] = useState<'editor' | 'canvas' | 'split'>('editor');
+    const [viewMode, setViewMode] = useState<'editor' | 'flow' | 'split'>('editor');
     
     const document = useQuery(api.documents.getById, {
         documentId:params.documentId

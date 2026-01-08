@@ -12,25 +12,26 @@ interface ShapeNodeData {
   editable?: boolean
 }
 
-export const CustomShapeNode: React.FC<NodeProps<ShapeNodeData>> = ({ 
+export const CustomShapeNode: React.FC<NodeProps> = ({ 
   data, 
   selected 
 }) => {
+  const nodeData = data as ShapeNodeData
   const [isEditing, setIsEditing] = useState(false)
-  const [label, setLabel] = useState(data.label || 'Shape')
+  const [label, setLabel] = useState(nodeData.label || 'Shape')
   const [tempLabel, setTempLabel] = useState(label)
 
   const handleEdit = useCallback(() => {
-    if (!data.editable) return
+    if (!nodeData.editable) return
     setTempLabel(label)
     setIsEditing(true)
-  }, [label, data.editable])
+  }, [label, nodeData.editable])
 
   const handleSave = useCallback(() => {
     setLabel(tempLabel)
     setIsEditing(false)
-    data.label = tempLabel
-  }, [tempLabel, data])
+    nodeData.label = tempLabel
+  }, [tempLabel, nodeData])
 
   const handleCancel = useCallback(() => {
     setTempLabel(label)
@@ -50,10 +51,10 @@ export const CustomShapeNode: React.FC<NodeProps<ShapeNodeData>> = ({
       flex items-center justify-center min-w-[100px] min-h-[60px] p-3
       bg-white dark:bg-gray-800 border-2 shadow-lg relative group
       ${selected ? 'border-theme-green' : 'border-gray-200 dark:border-gray-600'}
-      ${data.editable ? 'hover:border-theme-lightgreen' : ''}
+      ${nodeData.editable ? 'hover:border-theme-lightgreen' : ''}
     `
 
-    switch (data.shape) {
+    switch (nodeData.shape) {
       case 'circle':
         return `${baseStyles} rounded-full`
       case 'diamond':
@@ -64,7 +65,7 @@ export const CustomShapeNode: React.FC<NodeProps<ShapeNodeData>> = ({
   }
 
   const getContentStyles = () => {
-    return data.shape === 'diamond' ? 'transform -rotate-45' : ''
+    return nodeData.shape === 'diamond' ? 'transform -rotate-45' : ''
   }
 
   return (
@@ -107,7 +108,7 @@ export const CustomShapeNode: React.FC<NodeProps<ShapeNodeData>> = ({
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
               {label}
             </span>
-            {data.editable && selected && (
+            {nodeData.editable && selected && (
               <Button
                 size="sm"
                 variant="ghost"

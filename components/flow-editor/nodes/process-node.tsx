@@ -16,15 +16,16 @@ interface ProcessNodeData {
   editable?: boolean
 }
 
-export const ProcessNode: React.FC<NodeProps<ProcessNodeData>> = ({ 
+export const ProcessNode: React.FC<NodeProps> = ({ 
   data, 
   selected 
 }) => {
+  const nodeData = data as ProcessNodeData
   const [isEditing, setIsEditing] = useState(false)
-  const [processName, setProcessName] = useState(data.processName || 'Process')
-  const [description, setDescription] = useState(data.description || '')
-  const [inputs, setInputs] = useState<string[]>(data.inputs || [])
-  const [outputs, setOutputs] = useState<string[]>(data.outputs || [])
+  const [processName, setProcessName] = useState(nodeData.processName || 'Process')
+  const [description, setDescription] = useState(nodeData.description || '')
+  const [inputs, setInputs] = useState<string[]>(nodeData.inputs || [])
+  const [outputs, setOutputs] = useState<string[]>(nodeData.outputs || [])
   
   const [tempProcessName, setTempProcessName] = useState(processName)
   const [tempDescription, setTempDescription] = useState(description)
@@ -32,13 +33,13 @@ export const ProcessNode: React.FC<NodeProps<ProcessNodeData>> = ({
   const [tempOutputs, setTempOutputs] = useState<string[]>(outputs)
 
   const handleEdit = useCallback(() => {
-    if (!data.editable) return
+    if (!nodeData.editable) return
     setTempProcessName(processName)
     setTempDescription(description)
     setTempInputs([...inputs])
     setTempOutputs([...outputs])
     setIsEditing(true)
-  }, [processName, description, inputs, outputs, data.editable])
+  }, [processName, description, inputs, outputs, nodeData.editable])
 
   const handleSave = useCallback(() => {
     setProcessName(tempProcessName)
@@ -47,11 +48,11 @@ export const ProcessNode: React.FC<NodeProps<ProcessNodeData>> = ({
     setOutputs([...tempOutputs])
     setIsEditing(false)
     // Update the node data
-    data.processName = tempProcessName
-    data.description = tempDescription
-    data.inputs = [...tempInputs]
-    data.outputs = [...tempOutputs]
-  }, [tempProcessName, tempDescription, tempInputs, tempOutputs, data])
+    nodeData.processName = tempProcessName
+    nodeData.description = tempDescription
+    nodeData.inputs = [...tempInputs]
+    nodeData.outputs = [...tempOutputs]
+  }, [tempProcessName, tempDescription, tempInputs, tempOutputs, nodeData])
 
   const handleCancel = useCallback(() => {
     setTempProcessName(processName)
@@ -89,7 +90,7 @@ export const ProcessNode: React.FC<NodeProps<ProcessNodeData>> = ({
     <div className={cn(
       "bg-white dark:bg-gray-800 border-2 rounded-lg shadow-lg min-w-[250px] group",
       selected ? 'border-theme-green' : 'border-gray-200 dark:border-gray-600',
-      data.editable ? 'hover:border-theme-lightgreen' : ''
+      nodeData.editable ? 'hover:border-theme-lightgreen' : ''
     )}>
       <Handle
         type="target"
@@ -141,7 +142,7 @@ export const ProcessNode: React.FC<NodeProps<ProcessNodeData>> = ({
                 <p className="text-xs opacity-90 mt-1">{description}</p>
               )}
             </div>
-            {data.editable && selected && (
+            {nodeData.editable && selected && (
               <Button
                 size="sm"
                 variant="ghost"

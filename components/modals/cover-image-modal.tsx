@@ -12,7 +12,6 @@ import { Id } from "@/convex/_generated/dataModel";
 export const CoverImageModal = () => {
     const coverImage = useCoverImage();
     const params = useParams();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [file, setFile] = useState<File>();
     const [submitting, setIsSubmitting] = useState(false);
 

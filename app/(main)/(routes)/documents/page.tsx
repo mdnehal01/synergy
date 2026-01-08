@@ -38,7 +38,6 @@ const DocumentsPage = () => {
     }
 
     const onArchiveWorkspace = (workspaceId: string) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const promise = archiveWorkspace({ id: workspaceId as any });
         toast.promise(promise, {
             loading: "Archiving workspace...",

@@ -6,6 +6,7 @@ import {
   MiniMap, 
   Controls, 
   Background, 
+  BackgroundVariant,
   useNodesState, 
   useEdgesState, 
   addEdge,
@@ -44,17 +45,17 @@ import { ERDiagramNode } from './nodes/er-diagram-node'
 import { ProcessNode } from './nodes/process-node'
 import { CustomEdge } from './edges/custom-edge'
 
-const nodeTypes: NodeTypes = {
+const nodeTypes = {
   customText: CustomTextNode,
   customShape: CustomShapeNode,
   customImage: CustomImageNode,
   erDiagram: ERDiagramNode,
   processNode: ProcessNode,
-}
+} as NodeTypes
 
-const edgeTypes: EdgeTypes = {
+const edgeTypes = {
   custom: CustomEdge,
-}
+} as EdgeTypes
 
 interface FlowCanvasProps {
   initialData?: string
@@ -68,8 +69,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   editable = true 
 }) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
-  const [nodes, setNodes, onNodesChange] = useNodesState([])
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
+  const [nodes, setNodes, onNodesChange] = useNodesState([] as Node[])
+  const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[])
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null)
   const [selectedNodeType, setSelectedNodeType] = useState<'text' | 'rectangle' | 'circle' | 'diamond' | 'image'>('text')
 
@@ -289,7 +290,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           nodeColor="#f3f4f6"
           nodeBorderRadius={2}
         />
-        <Background variant="dots" gap={12} size={1} />
+        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
         
         {editable && (
           <Panel position="top-left" className="bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border">

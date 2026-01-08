@@ -11,27 +11,28 @@ interface TextNodeData {
   editable?: boolean
 }
 
-export const CustomTextNode: React.FC<NodeProps<TextNodeData>> = ({ 
+export const CustomTextNode: React.FC<NodeProps> = ({ 
   data, 
   selected,
   id
 }) => {
+  const nodeData = data as TextNodeData
   const [isEditing, setIsEditing] = useState(false)
-  const [label, setLabel] = useState(data.label || 'Text')
+  const [label, setLabel] = useState(nodeData.label || 'Text')
   const [tempLabel, setTempLabel] = useState(label)
 
   const handleEdit = useCallback(() => {
-    if (!data.editable) return
+    if (!nodeData.editable) return
     setTempLabel(label)
     setIsEditing(true)
-  }, [label, data.editable])
+  }, [label, nodeData.editable])
 
   const handleSave = useCallback(() => {
     setLabel(tempLabel)
     setIsEditing(false)
     // Update the node data
-    data.label = tempLabel
-  }, [tempLabel, data])
+    nodeData.label = tempLabel
+  }, [tempLabel, nodeData])
 
   const handleCancel = useCallback(() => {
     setTempLabel(label)
@@ -50,7 +51,7 @@ export const CustomTextNode: React.FC<NodeProps<TextNodeData>> = ({
     <div className={`
       px-4 py-2 shadow-lg rounded-lg bg-white dark:bg-gray-800 border-2 min-w-[120px]
       ${selected ? 'border-theme-green' : 'border-gray-200 dark:border-gray-600'}
-      ${data.editable ? 'hover:border-theme-lightgreen' : ''}
+      ${nodeData.editable ? 'hover:border-theme-lightgreen' : ''}
     `}>
       <Handle
         type="target"
@@ -90,7 +91,7 @@ export const CustomTextNode: React.FC<NodeProps<TextNodeData>> = ({
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex-1">
               {label}
             </span>
-            {data.editable && selected && (
+            {nodeData.editable && selected && (
               <Button
                 size="sm"
                 variant="ghost"
