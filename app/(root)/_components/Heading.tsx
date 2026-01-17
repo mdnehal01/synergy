@@ -10,20 +10,20 @@ const Heading = () => {
     const {isLoaded, isSignedIn} = useUser();
 
     return (
-        <div className='max-w-3xl space-y-6'>
+        <div className='max-w-4xl space-y-6'>
             <div className='inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 dark:border-blue-400/20'>
                 <Sparkles className='h-4 w-4 text-blue-600 dark:text-blue-400' />
                 <span className='text-sm font-semibold text-blue-600 dark:text-blue-400'>Powered by AI Intelligence</span>
             </div>
 
-            <h1 className='text-4xl sm:text-6xl md:text-7xl font-bold leading-tight'>
+            <h1 className='text-4xl sm:text-6xl md:text-8xl font-bold leading-tight'>
                 Take <span className='bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-blue-400 dark:via-purple-400 dark:to-pink-400'>smarter notes</span> with AI
             </h1>
-            <h3 className='text-lg sm:text-xl md:text-2xl font-light text-gray-600 dark:text-gray-300 max-w-2xl'>
+            <h3 className='text-lg sm:text-xl md:text-2xl font-light text-gray-600 dark:text-gray-300'>
                 Synergie is your collaborative workspace where brilliant ideas meet powerful AI. Think, work, and create—together, effortlessly.
             </h3>
 
-            <div className='flex flex-col sm:flex-row gap-3 pt-4'>
+            <div className='flex items-center gap-4 justify-center'>
                 {!isLoaded && <Loader/>}
                 {isLoaded && isSignedIn && 
                     (
