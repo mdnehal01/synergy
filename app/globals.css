@@ -69,6 +69,13 @@ html, body {
 }
 
 /* Color Theme Overrides */
+[data-color-theme="gradient"] {
+  --theme-green: #2563EB;
+  --theme-lightgreen: #3B82F6;
+  --theme-blue: #1E40AF;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
 [data-color-theme="blue"] {
   --theme-green: #0066CC;
   --theme-lightgreen: #4DA6FF;
@@ -134,6 +141,16 @@ html, body {
 /* Smooth transitions for drag operations */
 .drag-transition {
   transition: all 0.2s ease-in-out;
+}
+
+/* Hide scrollbar but keep scrollable */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom scrollbar for sidebar */

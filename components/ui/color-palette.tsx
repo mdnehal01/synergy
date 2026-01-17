@@ -6,6 +6,13 @@ import { Check } from "lucide-react"
 
 const colorThemes = [
   {
+    name: 'gradient',
+    label: 'Gradient',
+    primary: '#667eea',
+    secondary: '#764ba2',
+    preview: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  },
+  {
     name: 'default',
     label: 'Default',
     primary: '#017149',
@@ -80,7 +87,10 @@ export function ColorPalette() {
                 ? "border-foreground shadow-lg" 
                 : "border-border hover:border-foreground/50"
             )}
-            style={{ backgroundColor: theme.preview }}
+            style={{ 
+              background: theme.preview,
+              backgroundColor: typeof theme.preview === 'string' && theme.preview.startsWith('#') ? theme.preview : undefined
+            }}
             title={theme.label}
           >
             {currentTheme === theme.name && (

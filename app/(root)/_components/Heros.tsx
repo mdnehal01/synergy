@@ -3,23 +3,13 @@ import React from 'react'
 
 const Heros = () => {
   return (
-    <div className='flex flex-col items-center justify-center max-w-5xl'>
-        <div className='flex items-center'>
-            <div className='relative w-[300px] h-[300px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px]'>
-                <Image
-                    fill
-                    className='object-contain'
-                    src="/images/collaboration.svg"
-                    alt="Collaboration"
-                />
-            </div>
-            <div className='h-[400px] w-[400px] hidden md:block relative'>
-                <Image
-                    alt='Collab2'
-                    fill
-                    className='object-contain'
-                    src="/images/collab2.svg"
-                />
+    <div className='flex flex-col items-center justify-center max-w-5xl w-full'>
+        <div className='relative w-full'>
+            {/* Animated gradient background */}
+            <div className='absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 dark:from-blue-500/10 dark:via-purple-500/10 dark:to-pink-500/10 rounded-3xl blur-3xl'></div>
+            
+            <div className='relative flex items-center justify-center gap-4 md:gap-8'>
+               
             </div>
         </div>
     </div>

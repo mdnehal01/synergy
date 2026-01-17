@@ -112,44 +112,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     event.dataTransfer.dropEffect = 'move'
   }, [])
 
-  const onDrop = useCallback(
-    (event: React.DragEvent) => {
-      if (!editable) return
-      
-      event.preventDefault()
-
-      const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect()
-      if (!reactFlowBounds || !reactFlowInstance) return
-
-      const type = event.dataTransfer.getData('application/reactflow')
-      if (!type) return
-
-      const position = reactFlowInstance.project({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      })
-
-      const newNode: Node = {
-        id: `${type}-${Date.now()}`,
-        type: getNodeType(type),
-        position,
-        data: getNodeData(type),
-      }
-
-      setNodes((nds) => nds.concat(newNode))
-    },
-    [reactFlowInstance, setNodes, editable]
-  )
-
-  const getNodeType = (type: string) => {
-    switch (type) {
-      case 'text': return 'customText'
-      case 'image': return 'customImage'
-      default: return 'customShape'
-    }
-  }
-
-  const getNodeData = (type: string) => {
+  const getNodeData = useCallback((type: string) => {
     switch (type) {
       case 'text':
         return { label: 'New Text', editable }
@@ -177,6 +140,43 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         }
       default:
         return { label: 'Node', editable }
+    }
+  }, [editable])
+
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      if (!editable) return
+      
+      event.preventDefault()
+
+      const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect()
+      if (!reactFlowBounds || !reactFlowInstance) return
+
+      const type = event.dataTransfer.getData('application/reactflow')
+      if (!type) return
+
+      const position = reactFlowInstance.project({
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      })
+
+      const newNode: Node = {
+        id: `${type}-${Date.now()}`,
+        type: getNodeType(type),
+        position,
+        data: getNodeData(type),
+      }
+
+      setNodes((nds) => nds.concat(newNode))
+    },
+    [reactFlowInstance, setNodes, editable, getNodeData]
+  )
+
+  const getNodeType = (type: string) => {
+    switch (type) {
+      case 'text': return 'customText'
+      case 'image': return 'customImage'
+      default: return 'customShape'
     }
   }
 
