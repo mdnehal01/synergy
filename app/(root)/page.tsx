@@ -21,9 +21,6 @@ import { CTA } from "./_components/CTA";
       {/* Testimonials Section */}
       <Testimonials />
 
-      {/* Pricing Section */}
-      <Pricing />
-
       {/* CTA Section */}
       <CTA />
 
