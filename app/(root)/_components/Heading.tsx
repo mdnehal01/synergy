@@ -20,7 +20,7 @@ const Heading = () => {
                 Take <span className='bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-blue-400 dark:via-purple-400 dark:to-pink-400'>smarter notes</span> with AI
             </h1>
             <h3 className='text-lg sm:text-xl md:text-2xl font-light text-gray-600 dark:text-gray-300'>
-                Synergie is your collaborative workspace where brilliant ideas meet powerful AI. Think, work, and create—together, effortlessly.
+                Synergie is your collaborative workspace where brilliant ideas meet powerful AI. Think, work, and create—together, effortlessly..
             </h3>
 
             <div className='flex items-center gap-4 justify-center'>
