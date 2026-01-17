@@ -3,7 +3,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type ColorTheme = 'default' | 'green' | 'blue' | 'purple' | 'orange' | 'red' | 'pink' | 'teal'
+export type ColorTheme = 'gradient' | 'default' | 'green' | 'blue' | 'purple' | 'orange' | 'red' | 'pink' | 'teal'
 
 interface ThemeColorsStore {
   currentTheme: ColorTheme
@@ -13,7 +13,7 @@ interface ThemeColorsStore {
 export const useThemeColors = create<ThemeColorsStore>()(
   persist(
     (set) => ({
-      currentTheme: 'default',
+      currentTheme: 'gradient',
       setTheme: (theme: ColorTheme) => {
         set({ currentTheme: theme })
       },
