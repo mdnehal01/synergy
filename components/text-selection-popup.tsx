@@ -161,9 +161,9 @@ export const TextSelectionPopup = ({
                     // For "Generate More", show 3-second animation directly in editor
                     animateDirectlyInEditor(data.content.trim())
                 } else {
-                    // For other actions, insert immediately after selected text
-                    onInsertText(selectedText + ' ' + data.content)
-                    toast.success(`Text ${action}d and inserted successfully!`)
+                    // For summarize/rephrase, replace selected text with generated content
+                    onInsertText(data.content.trim())
+                    toast.success(`Text ${action}d and replaced successfully!`)
                     onClose()
                 }
             } else {
