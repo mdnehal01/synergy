@@ -6,12 +6,13 @@ import {
 } from "@blocknote/core";
 
 import "@blocknote/core/fonts/inter.css";
-import { BlockNoteView } from "@blocknote/mantine";
+import { BlockNoteView, darkDefaultTheme, lightDefaultTheme } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import "@blocknote/core/style.css";
 
 import React, { useCallback, useState } from "react";
+import { useTheme } from "next-themes";
 import { useEdgeStore } from "@/lib/edgestore";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
@@ -189,7 +190,9 @@ const Editor = ({
       onFlowChange(flowData);
     }
   }
-
+  const { resolvedTheme } = useTheme();
+  const stored = typeof resolvedTheme === 'string' ? resolvedTheme : 'light';
+  
   // Render based on view mode
   const renderContent = () => {
     switch (viewMode) {
@@ -213,6 +216,7 @@ const Editor = ({
               </div>
               <div className="max-h-[500px] overflow-y-auto">
                 <BlockNoteView
+                  theme={stored === 'dark' ? darkDefaultTheme : lightDefaultTheme}
                   editor={editor}
                   editable={editable}
                   onChange={() => {
@@ -265,6 +269,7 @@ const Editor = ({
             }}
           >
             <BlockNoteView
+              theme={stored === 'dark' ? darkDefaultTheme : lightDefaultTheme}
               editor={editor}
               editable={editable}
               onChange={() => {

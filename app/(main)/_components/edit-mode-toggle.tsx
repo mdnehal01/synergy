@@ -21,9 +21,9 @@ const EditModeToggle: React.FC<EditModeToggleProps> = ({
   onViewModeChange,
 }) => {
   return (
-    <div className={`absolute top-[50px] z-50 left-1/2 right-0 px-32 -translate-x-1/2 w-full ${!isEditMode ? 'bg-neutral-200 dark:bg-neutral-950 shadow': 'bg-transparent shadow-none'} py-2 flex items-center justify-between`}>
+    <div className={`absolute top-[50px] z-50 left-1/2 max-md:left-1/4 right-0 px-32 -translate-x-1/2 w-full ${!isEditMode ? 'shadow': 'bg-transparent shadow-none'} py-2 flex items-center justify-between`}>
       {/* View Mode Controls */}
-      <div className="flex items-center gap-2 text-sm font-medium">
+      <div className="flex items-center gap-2 text-sm font-medium max-sm:hidden">
         {isEditMode ? (
           <>
             {showFlowToggle && onViewModeChange && (
@@ -70,17 +70,17 @@ const EditModeToggle: React.FC<EditModeToggleProps> = ({
             )}
           </>
         ) : (
-          <>
+          <div className='max-md:hidden flex items-center gap-2'>
             <p>This page is in </p>
             <Eye className="h-4 w-4" />
             View Mode
             <p>Press toggle to turn to edit mode</p>
-          </>
+          </div>
         )}
       </div>
 
       {/* Toggle Switch */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 max-md:scale-75">
         <label className="relative inline-block w-12 h-6 cursor-pointer">
         <input
           type="checkbox"

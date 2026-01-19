@@ -117,7 +117,7 @@ const Toolbar:React.FC<ToolbarProps> = ({
                 </TextareaAutosize>
             ): 
             (
-                <div onClick={enableInput} className='pb-[11.5px] text-5xl font-bold break-words text-theme-blue outline-none'>
+                <div onClick={enableInput} className='pb-[11.5px] text-5xl max-md:text-2xl font-bold break-words text-theme-blue dark:text-theme-green outline-none'>
                     {initialData.title}
                 </div>
             )}
