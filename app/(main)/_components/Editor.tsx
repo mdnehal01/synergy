@@ -11,7 +11,7 @@ import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import "@blocknote/core/style.css";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useEdgeStore } from "@/lib/edgestore";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,10 @@ const Editor = ({
   const [showPromptInput, setShowPromptInput] = useState(false);
   const [prompt, setPrompt] = useState("");
   const textSelection = useTextSelection();
+  
+  // Debounce state for onChange to reduce write operations
+  const pendingChangeRef = useRef<string | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleUpload = async (file: File) => {
     const response = await edgestore.publicFiles.upload({ file });
@@ -190,6 +194,33 @@ const Editor = ({
       onFlowChange(flowData);
     }
   }
+
+  // Debounced onChange handler to reduce write operations (max 1 write per 2 seconds)
+  const handleDebouncedChange = useCallback((content: string) => {
+    if (!editable) return;
+    
+    pendingChangeRef.current = content;
+    
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (pendingChangeRef.current !== null) {
+        onChange(pendingChangeRef.current);
+      }
+    }, 2000); // Wait 2 seconds after last keystroke
+  }, [editable, onChange]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
   const { resolvedTheme } = useTheme();
   const stored = typeof resolvedTheme === 'string' ? resolvedTheme : 'light';
   
@@ -220,9 +251,7 @@ const Editor = ({
                   editor={editor}
                   editable={editable}
                   onChange={() => {
-                    if (editable) {
-                      onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
-                    }
+                    handleDebouncedChange(JSON.stringify(editor.topLevelBlocks, null, 2));
                   }}
                 />
               </div>
@@ -273,9 +302,7 @@ const Editor = ({
               editor={editor}
               editable={editable}
               onChange={() => {
-                if (editable) {
-                  onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
-                }
+                handleDebouncedChange(JSON.stringify(editor.topLevelBlocks, null, 2));
               }}
             />
           </div>
