@@ -98,7 +98,7 @@ export const getsidebar = query({
       .collect()
 
     // Sort by order field, then by creation time
-    return documents.sort((a, b) => {
+    const sorted = documents.sort((a, b) => {
       if (a.order !== undefined && b.order !== undefined) {
         return a.order - b.order;
       }
@@ -106,6 +106,17 @@ export const getsidebar = query({
       if (b.order !== undefined) return 1;
       return b._creationTime - a._creationTime;
     });
+
+    // Return only essential fields (excludes large content/flowData)
+    return sorted.map(doc => ({
+      _id: doc._id,
+      title: doc.title,
+      icon: doc.icon,
+      parentDocument: doc.parentDocument,
+      order: doc.order,
+      _creationTime: doc._creationTime,
+      isArchived: doc.isArchived
+    }));
   }
 })
 
@@ -434,23 +445,31 @@ export const remove = mutation({
   }
 })
 
+// Optimized lightweight query for search (excludes content/flowData to reduce bandwidth)
 export const getSearch = query({
   handler: async (ctx) => {
-    
     const identity = await ctx.auth.getUserIdentity();
     if(!identity) {
-      throw new Error("User not authenticated ")
+      throw new Error("User not authenticated")
     }
 
     const userId = identity.subject; 
     
     const documents = await ctx.db.query("documents")
-    .withIndex("by_user", (q) => q.eq("userId", userId))
-    .filter((q) => q.eq(q.field("isArchived"), false))
-    .order("desc")
-    .collect()
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("isArchived"), false))
+      .order("desc")
+      .collect()
 
-    return documents
+    // Return only essential fields (excludes large content/flowData fields)
+    return documents.map(doc => ({
+      _id: doc._id,
+      title: doc.title,
+      icon: doc.icon,
+      parentDocument: doc.parentDocument,
+      workspaceId: doc.workspaceId,
+      _creationTime: doc._creationTime
+    }))
   }
 });
 
@@ -500,8 +519,7 @@ export const update = mutation({
       throw new Error("user not authenticated");
     }
 
-    const userId = identity.subject;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars                                                                                                                       
+    const userId = identity.subject;                                                                                                                   
     const {id, ...rest} = args; 
 
     const existingDocuments = await ctx.db.get(args.id);
