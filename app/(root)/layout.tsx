@@ -1,3 +1,4 @@
+import Footer from "./_components/Footer";
 import Navbar from "./_components/Navbar";
 
 const RootLayout = ({
@@ -6,13 +7,14 @@ const RootLayout = ({
     children:React.ReactNode
 }) => {
     return(
-        <div className="h-full">
+        <div className="h-full flex flex-col">
             <Navbar/>
-            <main className="h-full pt-40">
+            <main className="flex-1 pt-40">
                 {
                     children
                 }
             </main>
+            <Footer />
         </div>
     )
 }

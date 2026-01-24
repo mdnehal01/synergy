@@ -37,5 +37,5 @@ next-env.d.ts
 .env
 
 # agent files
-.github/agents/us-agent.agent.md
-app/api/agents/user-story/route.ts
+# .github/agents/us-agent.agent.md
+# app/api/agents/user-story/route.ts
