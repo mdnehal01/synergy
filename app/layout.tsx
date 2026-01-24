@@ -6,6 +6,7 @@ import {Toaster} from 'sonner';
 import { EdgeStoreProvider } from "@/lib/edgestore";
 import { ThemeProvider } from "@/lib/providers/theme-provider";
 import { ThemeAttributeSetter } from "@/components/theme-attribute-setter";
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        
         <Toaster position="bottom-center"/>
           <ConvexClientProvider>
             <EdgeStoreProvider>
@@ -44,6 +46,7 @@ export default function RootLayout({
               >
                 <ThemeAttributeSetter />
                 {children}
+                <Analytics mode="development" />;
               </ThemeProvider>
             </EdgeStoreProvider>
           </ConvexClientProvider>
