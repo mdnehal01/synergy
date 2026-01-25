@@ -1,4 +1,3 @@
-import Footer from "./_components/Footer";
 import Navbar from "./_components/Navbar";
 
 const RootLayout = ({
@@ -14,7 +13,6 @@ const RootLayout = ({
                     children
                 }
             </main>
-            <Footer />
         </div>
     )
 }
