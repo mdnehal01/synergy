@@ -294,10 +294,17 @@ export async function PATCH(req: Request) {
       title, 
       description, 
       workItemId,
-      operation, // 'create', 'update', 'complete', 'abandon'
+      operation, // 'create', 'update', 'complete', 'abandon', 'addReviewers'
       reviewers, // Array of reviewer email addresses
       autoComplete,
-      completionOptions
+      completionOptions,
+      workItemUpdateId, // For work item updates
+      assignedTo,
+      state,
+      fields,
+      tags,
+      parentWorkItemId,
+      removeParent
     } = await req.json();
 
     // 2. Get repository ID
@@ -327,6 +334,200 @@ export async function PATCH(req: Request) {
         { error: "No repository found" },
         { status: 404 }
       );
+    }
+
+    // CHECK IF THIS IS A WORK ITEM UPDATE OPERATION
+    if (workItemUpdateId) {
+      const patchDocument: any[] = [];
+
+      // Update assignee
+      if (assignedTo !== undefined) {
+        patchDocument.push({
+          op: assignedTo === "" ? "remove" : "replace",
+          path: "/fields/System.AssignedTo",
+          value: assignedTo === "" ? undefined : assignedTo,
+        });
+      }
+
+      // Update state
+      if (state) {
+        patchDocument.push({
+          op: "replace",
+          path: "/fields/System.State",
+          value: state,
+        });
+      }
+
+      // Update title
+      if (title) {
+        patchDocument.push({
+          op: "replace",
+          path: "/fields/System.Title",
+          value: title,
+        });
+      }
+
+      // Update description
+      if (description) {
+        patchDocument.push({
+          op: "replace",
+          path: "/fields/System.Description",
+          value: description,
+        });
+      }
+
+      // Update custom fields
+      if (fields) {
+        Object.entries(fields).forEach(([fieldName, fieldValue]) => {
+          patchDocument.push({
+            op: "add",
+            path: `/fields/${fieldName}`,
+            value: fieldValue,
+          });
+        });
+      }
+
+      // Update tags
+      if (tags) {
+        patchDocument.push({
+          op: "add",
+          path: "/fields/System.Tags",
+          value: tags,
+        });
+      }
+
+      // Add parent link
+      if (parentWorkItemId) {
+        patchDocument.push({
+          op: "add",
+          path: "/relations/-",
+          value: {
+            rel: "System.LinkTypes.Hierarchy-Reverse",
+            url: `https://dev.azure.com/${process.env.AZURE_ORG}/${process.env.AZURE_PROJECT}/_apis/wit/workitems/${parentWorkItemId}`,
+          },
+        });
+      }
+
+      // Remove parent link
+      if (removeParent) {
+        // First fetch the work item to find the parent relation index
+        const workItemRes = await fetch(
+          `https://dev.azure.com/${process.env.AZURE_ORG}/${process.env.AZURE_PROJECT}/_apis/wit/workitems/${workItemUpdateId}?api-version=7.0`,
+          {
+            headers: {
+              Authorization:
+                "Basic " +
+                Buffer.from(":" + process.env.AZURE_PAT).toString("base64"),
+            },
+          }
+        );
+
+        if (workItemRes.ok) {
+          const workItem = await workItemRes.json();
+          if (workItem.relations) {
+            const parentIndex = workItem.relations.findIndex(
+              (rel: any) => rel.rel === "System.LinkTypes.Hierarchy-Reverse"
+            );
+            if (parentIndex >= 0) {
+              patchDocument.push({
+                op: "remove",
+                path: `/relations/${parentIndex}`,
+              });
+            }
+          }
+        }
+      }
+
+      if (patchDocument.length === 0) {
+        return NextResponse.json(
+          { error: "No fields to update" },
+          { status: 400 }
+        );
+      }
+
+      const updateRes = await fetch(
+        `https://dev.azure.com/${process.env.AZURE_ORG}/${process.env.AZURE_PROJECT}/_apis/wit/workitems/${workItemUpdateId}?api-version=7.0`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json-patch+json",
+            Authorization:
+              "Basic " +
+              Buffer.from(":" + process.env.AZURE_PAT).toString("base64"),
+          },
+          body: JSON.stringify(patchDocument),
+        }
+      );
+
+      if (!updateRes.ok) {
+        const errorText = await updateRes.text();
+        console.error("Azure DevOps work item update error:", errorText);
+        return NextResponse.json(
+          { error: "Failed to update work item", details: errorText },
+          { status: 500 }
+        );
+      }
+
+      const updatedWorkItem = await updateRes.json();
+
+      return NextResponse.json({
+        success: true,
+        id: updatedWorkItem.id,
+        workItemId: `US-${updatedWorkItem.id}`,
+        title: updatedWorkItem.fields["System.Title"],
+        state: updatedWorkItem.fields["System.State"],
+        assignedTo: updatedWorkItem.fields["System.AssignedTo"]?.displayName || "Unassigned",
+        url: `https://dev.azure.com/${process.env.AZURE_ORG}/${process.env.AZURE_PROJECT}/_workitems/edit/${updatedWorkItem.id}`,
+        message: "Work item updated successfully",
+      });
+    }
+
+    // Handle PR operations: addReviewers
+    if (pullRequestId && operation === 'addReviewers') {
+      if (!reviewers || !Array.isArray(reviewers) || reviewers.length === 0) {
+        return NextResponse.json(
+          { error: "reviewers array is required for addReviewers operation" },
+          { status: 400 }
+        );
+      }
+
+      // Add each reviewer to the PR
+      const addedReviewers = [];
+      for (const reviewerEmail of reviewers) {
+        const reviewerRes = await fetch(
+          `https://dev.azure.com/${process.env.AZURE_ORG}/${process.env.AZURE_PROJECT}/_apis/git/repositories/${repository.id}/pullRequests/${pullRequestId}/reviewers/${reviewerEmail}?api-version=7.0`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization:
+                "Basic " +
+                Buffer.from(":" + process.env.AZURE_PAT).toString("base64"),
+            },
+            body: JSON.stringify({
+              vote: 0,
+              isRequired: true
+            }),
+          }
+        );
+
+        if (reviewerRes.ok) {
+          const reviewer = await reviewerRes.json();
+          addedReviewers.push({
+            id: reviewer.id,
+            displayName: reviewer.displayName,
+            isRequired: reviewer.isRequired
+          });
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        pullRequestId: pullRequestId,
+        operation: 'addReviewers',
+        reviewersAdded: addedReviewers,
+        url: `https://dev.azure.com/${process.env.AZURE_ORG}/${process.env.AZURE_PROJECT}/_git/${repository.name}/pullrequest/${pullRequestId}`,
+      });
     }
 
     // Handle different operations
