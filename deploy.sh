@@ -26,27 +26,27 @@ if [[ ! -n "$DEPLOYMENT_TARGET" ]]; then
   DEPLOYMENT_TARGET=/home/site/wwwroot
 fi
 
-# 1. Navigate to deployment target
-cd "$DEPLOYMENT_TARGET"
 echo "Deployment target: $DEPLOYMENT_TARGET"
 
-# 2. Show Node.js version
+# 1. Show Node.js version
 echo "Using Node.js version: $(node --version)"
 echo "Using npm version: $(npm --version)"
 
+# 2. Navigate to deployment target
+cd "$DEPLOYMENT_TARGET"
+echo "Current directory: $(pwd)"
+echo "Files in deployment target:"
+ls -la
+
 # 3. Install npm packages
-if [ -e "$DEPLOYMENT_TARGET/package.json" ]; then
-  echo "Running npm install"
-  npm ci --omit=dev
-  exitWithMessageOnError "npm install failed"
-fi
+echo "Running npm install..."
+npm ci --omit=dev
+exitWithMessageOnError "npm install failed"
 
 # 4. Build Next.js application
-if [ -e "$DEPLOYMENT_TARGET/package.json" ]; then
-  echo "Running npm run build"
-  npm run build
-  exitWithMessageOnError "npm build failed"
-fi
+echo "Running npm run build..."
+npm run build
+exitWithMessageOnError "npm build failed"
 
 ##################################################################################################################################
 echo "Finished successfully."
