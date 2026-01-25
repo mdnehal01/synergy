@@ -72,7 +72,7 @@ echo "Using npm version: $(npm --version)"
 if [ -e "$DEPLOYMENT_TARGET/package.json" ]; then
   cd "$DEPLOYMENT_TARGET"
   echo "Running npm install"
-  eval npm install --production
+  eval npm install --omit=dev
   exitWithMessageOnError "npm install failed"
   cd - > /dev/null
 fi
