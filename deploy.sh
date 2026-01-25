@@ -64,14 +64,9 @@ if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   exitWithMessageOnError "Kudu Sync failed"
 fi
 
-# 2. Select node version
-if [[ -n "$KUDU_SELECT_NODE_VERSION_CMD" ]]; then
-  eval $KUDU_SELECT_NODE_VERSION_CMD "$DEPLOYMENT_SOURCE" "$DEPLOYMENT_SOURCE/package.json" || exitWithMessageOnError "select node version failed"
-  
-  if [[ -e "$DEPLOYMENT_SOURCE/.deployment.targets" ]]; then
-    source "$DEPLOYMENT_SOURCE/.deployment.targets"
-  fi
-fi
+# 2. Select node version (skip - Azure already has Node.js configured)
+echo "Using Node.js version: $(node --version)"
+echo "Using npm version: $(npm --version)"
 
 # 3. Install npm packages
 if [ -e "$DEPLOYMENT_TARGET/package.json" ]; then
